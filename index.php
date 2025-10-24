@@ -3,30 +3,7 @@
 session_start();
 
 // Mock data for demonstration
-$account = [
-    'balance' => 100000.00,
-    'equity' => 99999.89,
-    'margin' => 13.03,
-    'free_margin' => 99986.86,
-    'level' => 767458.866
-];
-
-$currency_pairs = [
-    ['symbol' => 'AUDCAD', 'bid' => 0.91162, 'ask' => 0.91175, 'change' => 0.41, 'direction' => 'up'],
-    ['symbol' => 'AUDCHF', 'bid' => 0.51828, 'ask' => 0.51841, 'change' => 0.41, 'direction' => 'down'],
-    ['symbol' => 'AUDDKK', 'bid' => 4.45852, 'ask' => 4.46016, 'change' => 0, 'direction' => 'neutral'],
-    ['symbol' => 'AUDHKD', 'bid' => 5.25944, 'ask' => 5.25953, 'change' => 0, 'direction' => 'neutral'],
-    ['symbol' => 'AUDHUF', 'bid' => 228.86992, 'ask' => 229.08708, 'change' => 0, 'direction' => 'neutral'],
-    ['symbol' => 'AUDJPY', 'bid' => 99.435, 'ask' => 99.448, 'change' => 0.89, 'direction' => 'up'],
-    ['symbol' => 'AUDNOK', 'bid' => 6.89340, 'ask' => 6.89630, 'change' => 0, 'direction' => 'neutral'],
-    ['symbol' => 'AUDNZD', 'bid' => 1.13246, 'ask' => 1.13273, 'change' => 0.21, 'direction' => 'up'],
-    ['symbol' => 'AUDPLN', 'bid' => 2.63122, 'ask' => 2.63225, 'change' => 0, 'direction' => 'neutral'],
-    ['symbol' => 'AUDSEK', 'bid' => 6.11812, 'ask' => 6.12610, 'change' => 0.46, 'direction' => 'up'],
-];
-
-$positions = [
-    ['symbol' => 'AUDCAD', 'type' => 'buy', 'volume' => 0.02, 'open_price' => 0.91182, 'current_price' => 0.91174, 'profit' => -0.11]
-];
+require 'helpers/currency_helpers.php';
 ?>
 
 <!DOCTYPE html>
@@ -51,7 +28,7 @@ $positions = [
                 <!-- Chart Section -->
                 <div class="chart-section">
                     <div class="chart-header">
-                        AUDCAD, H1: Australian Dollar vs Canadian Dollar
+                        <?php echo $currency_symbols[0].' '.$timeframes[4].' '. $currency_names[$currency_symbols[0]]; ?>
                     </div>
                     <div class="chart-container">
                         <div class="chart-placeholder">

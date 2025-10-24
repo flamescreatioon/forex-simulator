@@ -13,7 +13,7 @@ require 'helpers/currency_helpers.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Forex Trading Platform</title>
     <link rel="stylesheet" href="assets/css/style.css">
-    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    
 </head>
 <body>
     <div class="container">
@@ -31,9 +31,9 @@ require 'helpers/currency_helpers.php';
                         <?php echo $currency_symbols[0].' '.$timeframes[4].' '. $currency_names[$currency_symbols[0]]; ?>
                     </div>
                     <div class="chart-container">
-                        <div class="chart-placeholder">
+                        <!-- <div class="chart-placeholder">
                             <p>Chart visualization would go here (requires charting library like TradingView or Chart.js)</p>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
 
@@ -202,9 +202,8 @@ require 'helpers/currency_helpers.php';
             </div>
         </div>
     </div>
-
-    <script>
-      
-    </script>
+     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <script src="assets/js/app.js"></script>
+    <script src="controllers/chartControllers.js"></script>
 </body>
 </html>

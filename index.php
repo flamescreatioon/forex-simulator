@@ -202,8 +202,8 @@ require 'helpers/currency_helpers.php';
             </div>
         </div>
     </div>
-     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
-    <script src="assets/js/app.js"></script>
-    <script src="controllers/chartControllers.js"></script>
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <!-- Load the application as a module. app.js imports the chart controller. -->
+    <script type="module" src="assets/js/app.js"></script>
 </body>
 </html>

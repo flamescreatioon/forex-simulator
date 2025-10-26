@@ -116,6 +116,7 @@ body {
     padding: 20px;
     background: #fafafa;
     position: relative;
+    min-height: 400px;
 }
 
 .chart-placeholder {

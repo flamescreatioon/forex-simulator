@@ -74,23 +74,23 @@ require 'helpers/currency_helpers.php';
                     <div class="account-info">
                         <div class="info-item">
                             <span class="info-label">Balance:</span>
-                            <span class="info-value"><?php echo number_format($account['balance'], 2); ?></span>
+                            <span class="info-value"><?php echo number_format($_SESSION['balance'], 2); ?></span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Equity:</span>
-                            <span class="info-value"><?php echo number_format($account['equity'], 2); ?></span>
+                            <span class="info-value"><?php echo number_format($_SESSION['equity'], 2); ?></span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Margin:</span>
-                            <span class="info-value"><?php echo number_format($account['margin'], 2); ?></span>
+                            <span class="info-value"><?php echo number_format($_SESSION['margin'], 2); ?></span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Free margin:</span>
-                            <span class="info-value"><?php echo number_format($account['free_margin'], 2); ?></span>
+                            <span class="info-value"><?php echo number_format($_SESSION['freemargin'], 2); ?></span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Level:</span>
-                            <span class="info-value"><?php echo number_format($account['level'], 2); ?>%</span>
+                            <span class="info-value"><?php echo number_format($_SESSION['marginlevel'], 2); ?>%</span>
                         </div>
                     </div>
 

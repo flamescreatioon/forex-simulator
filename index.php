@@ -74,23 +74,23 @@ require 'helpers/currency_helpers.php';
                     <div class="account-info">
                         <div class="info-item">
                             <span class="info-label">Balance:</span>
-                            <span class="info-value"><?php echo number_format($_SESSION['balance'], 2); ?></span>
+                            <span class="info-value" id="balance"><?php echo number_format($_SESSION['balance'], 2); ?></span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Equity:</span>
-                            <span class="info-value"><?php echo number_format($_SESSION['equity'], 2); ?></span>
+                            <span class="info-value" id="equity"><?php echo number_format($_SESSION['equity'], 2); ?></span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Margin:</span>
-                            <span class="info-value"><?php echo number_format($_SESSION['margin'], 2); ?></span>
+                            <span class="info-value" id="margin"><?php echo number_format($_SESSION['margin'], 2); ?></span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Free margin:</span>
-                            <span class="info-value"><?php echo number_format($_SESSION['freemargin'], 2); ?></span>
+                            <span class="info-value" id="freemargin"><?php echo number_format($_SESSION['freemargin'], 2); ?></span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Level:</span>
-                            <span class="info-value"><?php echo number_format($_SESSION['marginlevel'], 2); ?>%</span>
+                            <span class="info-value" id="marginlevel"><?php echo number_format($_SESSION['marginlevel'], 2); ?>%</span>
                         </div>
                     </div>
 
@@ -205,5 +205,6 @@ require 'helpers/currency_helpers.php';
     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
     <!-- Load the application as a module. app.js imports the chart controller. -->
     <script type="module" src="assets/js/app.js"></script>
+    <script src="controllers/updateController.js"></script>
 </body>
 </html>

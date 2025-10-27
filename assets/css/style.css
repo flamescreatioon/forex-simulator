@@ -264,6 +264,7 @@ body {
     width: 100%;
     border-collapse: collapse;
     font-size: 13px;
+    
 }
 
 .positions-table th {
@@ -275,6 +276,45 @@ body {
 }
 
 .positions-table td {
+    padding: 8px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.trades-history{
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    display: none;
+}
+
+.trades-history th{
+    text-align: left;
+    padding: 8px;
+    background: #f8f9fa;
+    font-weight: 600;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.trades-history td{
+    padding: 8px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.deals-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.deals-table th {
+    text-align: left;
+    padding: 8px;
+    background: #f8f9fa;
+    font-weight: 600;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.deals-table td {
     padding: 8px;
     border-bottom: 1px solid #f0f0f0;
 }

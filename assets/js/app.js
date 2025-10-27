@@ -58,6 +58,56 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, 3000);
 
+    const panel_tabs = document.querySelectorAll('.panel-tab');
+    panel_tabs.forEach(tab => {
+        tab.addEventListener('click', function () {
+            // set active class on tabs
+            panel_tabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+
+            // hide all tables that are part of the panel (only those in .panel-content)
+            const panelTables = document.querySelectorAll('.panel-content table');
+            panelTables.forEach(tbl => tbl.style.display = 'none');
+
+            // Also hide the no-positions message
+            const noPositions = document.querySelector('.no-positions');
+            if (noPositions) noPositions.style.display = 'none';
+
+            // determine which table to show
+            let targetEl = null;
+
+            // 1) explicit selector via data-target (e.g. data-target=".positions-table")
+            if (this.dataset && this.dataset.target) {
+                targetEl = document.querySelector(this.dataset.target);
+            } else {
+                // 2) fallback to tab text matching
+                const txt = (this.textContent || '').toLowerCase();
+                if (txt.includes('position')) {
+                    targetEl = document.querySelector('.positions-table');
+                    // If no positions table, show the no-positions message
+                    if (!targetEl && noPositions) {
+                        noPositions.style.display = 'block';
+                    }
+                } else if (txt.includes('order')) {
+                    targetEl = document.querySelector('.trades-history');
+                } else if (txt.includes('deal')) {
+                    // Deals tab - could show a different table or message
+                    targetEl = document.querySelector('.deals-table');
+                }
+            }
+
+            // show the target table (restore default display)
+            if (targetEl) {
+                targetEl.style.display = 'table'; // explicitly show as table
+            } else {
+                console.warn('No table found for tab:', this);
+            }
+        });
+    });
+
+    // activate a default tab (first .panel-tab with .active or the first tab)
+    (document.querySelector('.panel-tab.active') || panel_tabs[0])?.click();
+
     // Initialize chart after DOM is ready. Errors are logged to console.
     initChart('.chart-container').catch(err => console.error('Chart init failed:', err));
 });

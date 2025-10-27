@@ -66,9 +66,9 @@ require 'helpers/currency_helpers.php';
             <!-- Bottom Panel -->
             <div class="bottom-panel">
                 <div class="panel-tabs">
-                    <div class="panel-tab active">Positions</div>
-                    <div class="panel-tab">Orders</div>
-                    <div class="panel-tab">Deals</div>
+                    <div class="panel-tab active" data-target=".positions-table">Positions</div>
+                    <div class="panel-tab" data-target=".trades-history">Orders</div>
+                    <div class="panel-tab" data-target=".deals-table">Deals</div>
                 </div>
                 <div class="panel-content">
                     <div class="account-info">
@@ -132,9 +132,42 @@ require 'helpers/currency_helpers.php';
                             <a href="#" class="create-order-link" onclick="openOrderModal(); return false;">Create New Order</a>
                         </div>
                     <?php endif; ?>
+
+                    <table class="trades-history" >
+                        <thead>
+                            <tr>
+                                <th>Pair</th>
+                                <th>Profit</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tradesTableBody">
+                           <tr>
+                            <td>No trades yet</td>
+                           </tr>
+                        </tbody>
+                    </table>
+
+                    <table class="deals-table" style="display: none;">
+                        <thead>
+                            <tr>
+                                <th>Deal ID</th>
+                                <th>Time</th>
+                                <th>Symbol</th>
+                                <th>Type</th>
+                                <th>Volume</th>
+                                <th>Price</th>
+                                <th>Profit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                           <tr>
+                            <td colspan="7">No deals yet</td>
+                           </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
-        </div>
     </div>
 
     <!-- Mobile Navigation -->

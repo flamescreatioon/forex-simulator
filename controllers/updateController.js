@@ -13,5 +13,25 @@ function updateDashboard(){
         .catch(err=>console.error("Error fetching data: ", err));
 }
 
+
+function updateTrades(){
+    fetch('../trades.php')
+        .then(response => response.json())
+        .then(data => {
+            const tradesTableBody = document.getElementById('tradesTableBody');
+            tradesTableBody.innerHTML = ''; // Clear existing rows
+            data.forEach(trade => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${trade.pair}</td>
+                    <td>${trade.profit}</td>
+                    <td>${trade.timestamp}</td>
+                `;
+                tradesTableBody.appendChild(row);
+            });
+        })
+        .catch(err => console.error("Error fetching trades: ", err));
+}
+setInterval(updateTrades, 5000); // Update every 5 seconds
 setInterval(updateDashboard, 5000); // Update every 5 seconds
 updateDashboard();

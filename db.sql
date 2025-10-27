@@ -1,0 +1,23 @@
+CREATE DATABASE volatility
+use volatility;
+
+CREATE TABLE sessions (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  session_id VARCHAR(255) UNIQUE,
+  balance DECIMAL(12,2) DEFAULT 0,
+  profit DECIMAL(12,2) DEFAULT 0,
+  goal DECIMAL(12,2) DEFAULT 0,
+  equity DECIMAL(12,2) DEFAULT 0,
+  margin DECIMAL(12,2) DEFAULT 0,
+  free_margin DECIMAL(12,2) DEFAULT 0,
+  margin_level DECIMAL(12,2) DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE trades (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  session_id VARCHAR(255),
+  pair VARCHAR(20),
+  profit DECIMAL(8,2),
+  timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+);

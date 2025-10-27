@@ -1,6 +1,8 @@
 <?php
 // Start the session to persist values between requests
 session_start();
+require_once 'includes/db.php';
+$session_id = session_id();
 
 // Retrieve persisted values or set defaults
 $balance = $_SESSION["balance"] ?? 10000;     // current account balance
@@ -43,3 +45,14 @@ echo json_encode([
     'goal' => number_format($goal, 2),
     'goal_reached' => $goal_reached
 ]);
+
+$stmt = $pdo->prepare("SELECT id FROM sessions WHERE session_id=?");
+$stmt->execute([$session_id]);
+
+if($stm->rowCount()==0){
+    $insert = $pdo->prepare("INSERT INTO sessions (session_id, balance, equity, margin, free_margin, margin_level, profit, goal) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+    $insert->execute([$session_id, $balance, $equity, $margin, $free_margin, $margin_level, $profit, $goal]);
+} else {
+    $update = $pdo->prepare("UPDATE sessions SET balance=?, equity=?, margin=?, free_margin=?, margin_level=?, profit=?, goal=? WHERE session_id=?");
+    $update->execute([$balance, $equity, $margin, $free_margin, $margin_level, $profit, $goal, $session_id]);
+}

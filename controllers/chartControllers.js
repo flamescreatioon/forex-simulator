@@ -23,7 +23,7 @@ export async function initChart(containerSelector = '.chart-container') {
     const chart = LightweightCharts.createChart(chartContainer);
 
     // Resolve JSON path relative to this module file so it works irrespective of how the page was loaded.
-    const dataUrl = new URL('../data/forex_candlestick_data.json', import.meta.url).href;
+    const dataUrl = new URL('../helpers/candles.php', import.meta.url).href;
     const res = await fetch(dataUrl);
     if (!res.ok) {
         throw new Error(`Failed to fetch chart data: ${res.status} ${res.statusText}`);

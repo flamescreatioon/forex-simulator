@@ -1,7 +1,11 @@
 <?php
 // Start the session to persist values between requests
 session_start();
-/* require_once 'includes/db.php'; */
+require_once 'includes/db.php';
+header('Content-Type: application/json');
+// Don't leak PHP warnings/notices into JSON responses
+@ini_set('display_errors', 0);
+@error_reporting(E_ERROR | E_PARSE);
 $session_id = session_id();
 
 // Retrieve persisted values or set defaults
@@ -34,7 +38,25 @@ $_SESSION["equity"] = $equity;
 // Determine if goal has been reached
 $goal_reached = $balance >= $goal;
 
-// Return a JSON payload with formatted numbers
+// Persist to DB (if available); failures must not break JSON response
+try {
+    if (isset($pdo) && $pdo instanceof PDO) {
+        $stmt = $pdo->prepare("SELECT id FROM sessions WHERE session_id=?");
+        $stmt->execute([$session_id]);
+
+        if($stmt->rowCount()==0){
+            $insert = $pdo->prepare("INSERT INTO sessions (session_id, balance, equity, margin, free_margin, margin_level, profit, goal) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            $insert->execute([$session_id, $balance, $equity, $margin, $free_margin, $margin_level, $profit, $goal]);
+        } else {
+            $update = $pdo->prepare("UPDATE sessions SET balance=?, equity=?, margin=?, free_margin=?, margin_level=?, profit=?, goal=? WHERE session_id=?");
+            $update->execute([$balance, $equity, $margin, $free_margin, $margin_level, $profit, $goal, $session_id]);
+        }
+    }
+} catch (Throwable $e) {
+    // swallow DB errors; we still return JSON below
+}
+
+// Return a JSON payload with formatted numbers (after DB ops to avoid corrupting JSON with PHP notices)
 echo json_encode([
     'balance' => number_format($balance, 2),
     'equity' => number_format($equity, 2),
@@ -45,14 +67,3 @@ echo json_encode([
     'goal' => number_format($goal, 2),
     'goal_reached' => $goal_reached
 ]);
-
-/* $stmt = $pdo->prepare("SELECT id FROM sessions WHERE session_id=?");
-$stmt->execute([$session_id]);
-
-if($stm->rowCount()==0){
-    $insert = $pdo->prepare("INSERT INTO sessions (session_id, balance, equity, margin, free_margin, margin_level, profit, goal) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-    $insert->execute([$session_id, $balance, $equity, $margin, $free_margin, $margin_level, $profit, $goal]);
-} else {
-    $update = $pdo->prepare("UPDATE sessions SET balance=?, equity=?, margin=?, free_margin=?, margin_level=?, profit=?, goal=? WHERE session_id=?");
-    $update->execute([$balance, $equity, $margin, $free_margin, $margin_level, $profit, $goal, $session_id]);
-} */

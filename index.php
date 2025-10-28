@@ -26,7 +26,7 @@ require 'helpers/currency_helpers.php';
             <!-- Trading Area -->
             <div class="trading-area">
                 <!-- Chart Section -->
-                <div class="chart-section">
+                <div class="chart-section" id="chart">
                     <div class="chart-header">
                         <?php echo $currency_symbols[0].' '.$timeframes[4].' '. $currency_names[$currency_symbols[0]]; ?>
                     </div>
@@ -38,7 +38,7 @@ require 'helpers/currency_helpers.php';
                 </div>
 
                 <!-- Symbol List -->
-                <div class="symbol-list">
+                <div class="symbol-list" id="quotes">
                     <div class="symbol-search">
                         <input type="text" placeholder="Search symbol" id="symbolSearch">
                     </div>
@@ -147,6 +147,9 @@ require 'helpers/currency_helpers.php';
                            </tr>
                         </tbody>
                     </table>
+                    <div style="margin-top:8px;">
+                        <a href="trades_view.php" class="create-order-link">View all trades</a>
+                    </div>
 
                     <table class="deals-table" style="display: none;">
                         <thead>
@@ -172,26 +175,26 @@ require 'helpers/currency_helpers.php';
 
     <!-- Mobile Navigation -->
     <div class="mobile-nav">
-        <div class="mobile-nav-item active">
+        <a class="mobile-nav-item active" href="#quotes">
             <span>📊</span>
             <span>Quotes</span>
-        </div>
-        <div class="mobile-nav-item">
+        </a>
+        <a class="mobile-nav-item" href="#chart">
             <span>📈</span>
             <span>Chart</span>
-        </div>
-        <div class="mobile-nav-item">
+        </a>
+        <a class="mobile-nav-item" href="trade.php">
             <span>≡</span>
             <span>Trade</span>
-        </div>
-        <div class="mobile-nav-item">
+        </a>
+        <a class="mobile-nav-item" href="trades_view.php">
             <span>🕐</span>
             <span>History</span>
-        </div>
-        <div class="mobile-nav-item">
+        </a>
+        <a class="mobile-nav-item" href="info.php">
             <span>⚙</span>
             <span>Settings</span>
-        </div>
+        </a>
     </div>
 
     <!-- Order Modal -->

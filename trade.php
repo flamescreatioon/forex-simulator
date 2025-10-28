@@ -25,8 +25,8 @@ if (!isset($_SESSION['balance'])) {
         <div>Balance: <span class="font-semibold"><?= number_format($_SESSION['balance'], 2) ?></span></div>
         <div>Equity: <span class="font-semibold"><?= number_format($_SESSION['equity'], 2) ?></span></div>
         <div>Margin: <span class="font-semibold"><?= number_format($_SESSION['margin'], 2) ?></span></div>
-        <div>Free Margin: <span class="font-semibold"><?= number_format($_SESSION['free_margin'], 2) ?></span></div>
-        <div>Margin Level (%): <span class="font-semibold"><?= number_format($_SESSION['margin_level'], 2) ?></span></div>
+        <div>Free Margin: <span class="font-semibold"><?= number_format($_SESSION['freemargin'], 2) ?></span></div>
+        <div>Margin Level (%): <span class="font-semibold"><?= number_format($_SESSION['marginlevel'], 2) ?></span></div>
       </div>
     </div>
 

@@ -1,10 +1,13 @@
 <?php
 
 session_start();
-/* require_once 'includes/db.php'; */
-$session_id = session_id();
-
+require_once 'includes/db.php';
 header('Content-Type: application/json');
+// Don't leak PHP warnings/notices into JSON responses
+@ini_set('display_errors', 0);
+@error_reporting(E_ERROR | E_PARSE);
+
+$session_id = session_id();
 
 if(!isset($_SESSION['trades'])){
     $_SESSION['trades'] = [];
@@ -19,29 +22,17 @@ $new_trade = [
 ];
 
 array_unshift($_SESSION['trades'], $new_trade);
-
 $_SESSION['trades'] = array_slice($_SESSION['trades'], 0, 10);
 
-echo json_encode($_SESSION['trades']);
-
-/* 
-$trades = [];
-
-for ($i = 0; $i < 8; $i++) {
-    $entry = 3077.61;
-    $current = 3569.59;
-    $profit = 9830 + rand(0, 20);
-
-    $trades[] = [
-        "pair" => "Volatility 75 (1s) Index",
-        "lot" => 20,
-        "entry" => number_format($entry, 2),
-        "current" => number_format($current, 2),
-        "profit" => number_format($profit, 2),
-    ];
+// Persist to DB first; failures should not corrupt the JSON body
+try {
+    if (isset($pdo)) {
+        $stmt = $pdo->prepare("INSERT INTO trades (session_id, pair, profit) VALUES (?, ?, ?)");
+        $stmt->execute([$session_id, $new_trade['pair'], $new_trade['profit']]);
+    }
+} catch (Throwable $e) {
+    // Swallow DB errors for this lightweight demo endpoint
 }
 
-echo json_encode($trades);
- */
-/* $stmt = $pdo->prepare("INSERT INTO trades (session_id, pair, profit) VALUES (?, ?, ?)");
-$stmt->execute([$session_id, $new_trade['pair'], $new_trade['profit']]); */
+// Now output JSON response only
+echo json_encode($_SESSION['trades']);

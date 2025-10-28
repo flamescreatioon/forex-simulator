@@ -1,7 +1,7 @@
 <?php
 // Start the session to persist values between requests
 session_start();
-require_once 'includes/db.php';
+/* require_once 'includes/db.php'; */
 $session_id = session_id();
 
 // Retrieve persisted values or set defaults
@@ -46,7 +46,7 @@ echo json_encode([
     'goal_reached' => $goal_reached
 ]);
 
-$stmt = $pdo->prepare("SELECT id FROM sessions WHERE session_id=?");
+/* $stmt = $pdo->prepare("SELECT id FROM sessions WHERE session_id=?");
 $stmt->execute([$session_id]);
 
 if($stm->rowCount()==0){
@@ -55,4 +55,4 @@ if($stm->rowCount()==0){
 } else {
     $update = $pdo->prepare("UPDATE sessions SET balance=?, equity=?, margin=?, free_margin=?, margin_level=?, profit=?, goal=? WHERE session_id=?");
     $update->execute([$balance, $equity, $margin, $free_margin, $margin_level, $profit, $goal, $session_id]);
-}
+} */

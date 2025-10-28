@@ -1,9 +1,9 @@
 <?php
 
-$servername = "144.91.76.162";
-$username = "root";
-$password = "";
-$dbname = "";
+$servername = "82.197.82.121";
+$username = "u877800740_forex";
+$password = "Forexapp@2025";
+$dbname = "u877800740_forex";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 

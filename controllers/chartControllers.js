@@ -2,39 +2,114 @@
 // Usage: import { initChart } from './controllers/chartControllers.js';
 // then call initChart() after the DOM is ready.
 
-export async function initChart(containerSelector = '.chart-container') {
-    const chartContainer = document.querySelector(containerSelector);
+export async function initChart(containerSelectorOrElement) {
+    // Default selector targets the specific chart container within #chart section
+    const defaultSelector = '#chart .chart-container';
+    const selectorUsed = typeof containerSelectorOrElement === 'string' && containerSelectorOrElement
+        ? containerSelectorOrElement
+        : defaultSelector;
+    console.log('initChart called with selector/element:', selectorUsed);
+
+    // Resolve container from selector or element
+    const resolveContainer = (selOrEl) => {
+        if (selOrEl instanceof HTMLElement) return selOrEl;
+        const sel = typeof selOrEl === 'string' ? selOrEl : defaultSelector;
+        let el = document.querySelector(sel);
+        if (!el) {
+            // Fallback: create a .chart-container inside #chart if #chart exists
+            const chartSection = document.getElementById('chart');
+            if (chartSection) {
+                el = document.createElement('div');
+                el.className = 'chart-container';
+                el.style.minHeight = '400px';
+                chartSection.appendChild(el);
+                console.warn('Created missing .chart-container inside #chart');
+                return el;
+            }
+        }
+        return el;
+    };
+
+    const chartContainer = resolveContainer(containerSelectorOrElement);
     if (!chartContainer) {
-        throw new Error(`Chart container not found for selector: ${containerSelector}`);
+        console.error('Chart container not found for selector:', selectorUsed);
+        throw new Error(`Chart container not found for selector: ${selectorUsed}`);
     }
+    
+    console.log('Chart container found:', chartContainer);
+    console.log('Container dimensions:', chartContainer.getBoundingClientRect());
 
     // If the container has zero height (rare), give it a sensible default so the chart can render.
     const rect = chartContainer.getBoundingClientRect();
     if (rect.height === 0) {
+        console.warn('Container has zero height, setting minHeight to 400px');
         chartContainer.style.minHeight = '400px';
+    }
+    if (rect.width === 0) {
+        console.warn('Container width is 0; attempting to expand to parent width');
+        chartContainer.style.width = '100%';
+    }
+
+    // If container is hidden (display:none) or still size-less, wait until visible
+    const isRenderable = (el) => el && el.offsetParent !== null && (el.clientWidth > 0 && el.clientHeight > 0);
+    if (!isRenderable(chartContainer)) {
+        console.warn('Chart container not renderable yet; waiting for layout...');
+        await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 50)));
     }
 
     // The library global is `LightweightCharts` (not "LightweightsCharts"). Ensure the lib is loaded
     // before calling this function (index.php will include the CDN script before the module).
     if (typeof LightweightCharts === 'undefined') {
+        console.error('LightweightCharts library is not loaded!');
         throw new Error('LightweightCharts is not loaded. Make sure the library script is included before this module.');
     }
+    
+    console.log('LightweightCharts library detected:', typeof LightweightCharts);
 
-    const chart = LightweightCharts.createChart(chartContainer);
+    // Lock a stable height to prevent feedback loops that grow the container
+    const measured = chartContainer.getBoundingClientRect();
+    const initialHeight = Math.max(300, Math.floor(measured.height) || 400);
+    // Explicitly set container height to a stable pixel value
+    chartContainer.style.height = initialHeight + 'px';
 
-    // Resolve JSON path relative to this module file so it works irrespective of how the page was loaded.
-    const dataUrl = new URL('../helpers/candles.php', import.meta.url).href;
+    const chart = LightweightCharts.createChart(chartContainer, {
+        layout: {
+            background: { color: '#ffffff' },
+            textColor: '#333',
+        },
+        grid: {
+            vertLines: { color: '#f0f0f0' },
+            horzLines: { color: '#f0f0f0' },
+        },
+        timeScale: {
+            timeVisible: true,
+            secondsVisible: false,
+        },
+        width: chartContainer.clientWidth,
+        height: initialHeight,
+    });
+    
+    console.log('Chart created successfully');
+
+    // Build absolute URL to avoid any module-relative resolution quirks
+    const origin = window.location.origin;
+    const basePath = '/new_forex';
+    const dataUrl = `${origin}${basePath}/helpers/candles.php`;
+    console.log('Fetching candle data from:', dataUrl);
+    
     const res = await fetch(dataUrl);
     if (!res.ok) {
+        console.error('Failed to fetch chart data:', res.status, res.statusText);
         throw new Error(`Failed to fetch chart data: ${res.status} ${res.statusText}`);
     }
     const payload = await res.json();
+    console.log('Candle data received:', payload.length, 'candles');
 
     // The JSON file stores data under `data` and uses `timestamp` keys.
     // LightweightCharts expects an array of points with a `time` field
     // (either a unix timestamp in seconds or a date string) and OHLC keys.
-    const raw = Array.isArray(payload) ? payload : payload.data || [];
-    const formatted = raw.map(item => {
+    const raw = Array.isArray(payload) ? payload : (payload && payload.data) || [];
+    let formatted = raw.map(item => {
         // Support both `timestamp` (ISO string) or numeric `time` values.
         let time;
         if (item.timestamp) {
@@ -57,12 +132,108 @@ export async function initChart(containerSelector = '.chart-container') {
             low: item.low,
             close: item.close,
         };
-    });
+    }).filter(pt => typeof pt.time === 'number' && isFinite(pt.time) &&
+                     typeof pt.open === 'number' && typeof pt.high === 'number' &&
+                     typeof pt.low === 'number' && typeof pt.close === 'number');
+    
+    console.log('Data formatted, first candle:', formatted[0], 'last candle:', formatted[formatted.length - 1]);
 
     const candlestickSeries = chart.addSeries(LightweightCharts.CandlestickSeries);
-    candlestickSeries.setData(formatted);
+    if (formatted.length === 0) {
+        console.warn('No valid candle data to render. Check candles.php output.');
+    } else {
+        candlestickSeries.setData(formatted);
+    }
+    
+    console.log('Candlestick series added and data set');
+
+    // Hide fallback helper if present
+    const fallback = document.getElementById('chart-fallback');
+    if (fallback) fallback.style.display = 'none';
+
+    // Auto-resize chart when window resizes
+    const resizeObserver = new ResizeObserver(entries => {
+        if (entries.length === 0 || entries[0].target !== chartContainer) {
+            return;
+        }
+        const newRect = chartContainer.getBoundingClientRect();
+        // Only adjust width on resize; keep height stable to avoid growth feedback
+        chart.applyOptions({ width: newRect.width });
+    });
+    resizeObserver.observe(chartContainer);
+
+    // Start continuous candle generation
+    console.log('Starting continuous updates...');
+    startContinuousUpdates(candlestickSeries);
 
     return { chart, candlestickSeries };
 }
+
+// Function to continuously generate and add new candles
+function startContinuousUpdates(candlestickSeries) {
+    // Get simulation speed from sessionStorage
+    const getUpdateInterval = () => {
+        const simSpeed = sessionStorage.getItem('sim_speed') || 'normal';
+        const intervalMap = {
+            'slow': 10000,   // 10 seconds
+            'normal': 5000,  // 5 seconds
+            'fast': 2000     // 2 seconds
+        };
+        return intervalMap[simSpeed] || 5000;
+    };
+
+    let updateInterval = getUpdateInterval();
+    let intervalId;
+
+    const updateCandle = async () => {
+        try {
+            const origin = window.location.origin;
+            const basePath = '/new_forex';
+            const nextCandleUrl = `${origin}${basePath}/helpers/next_candle.php`;
+            const response = await fetch(nextCandleUrl, { cache: 'no-store' });
+            
+            if (!response.ok) {
+                console.warn('Failed to fetch next candle:', response.status);
+                return;
+            }
+            
+            const newCandle = await response.json();
+            
+            // Check if it's an error response
+            if (newCandle.error) {
+                console.warn('Candle generation error:', newCandle.error);
+                return;
+            }
+            
+            // Add the new candle to the chart
+            if (newCandle.time && newCandle.open && newCandle.close) {
+                candlestickSeries.update(newCandle);
+            }
+            
+        } catch (error) {
+            console.error('Error updating candle:', error);
+        }
+    };
+
+    // Initial update
+    updateCandle();
+
+    // Set up interval with dynamic speed checking
+    const startInterval = () => {
+        if (intervalId) clearInterval(intervalId);
+        updateInterval = getUpdateInterval();
+        intervalId = setInterval(updateCandle, updateInterval);
+    };
+
+    startInterval();
+
+    // Listen for speed changes
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'sim_speed') {
+            startInterval(); // Restart with new interval
+        }
+    });
+}
+
 
 

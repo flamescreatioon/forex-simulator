@@ -1,20 +1,19 @@
 <?php
-session_start();
-if (!isset($_SESSION['balance'])) {
-    header("Location: set_params.php");
-    exit;
-}
+require_once 'includes/session.php';
+// Defaults are now always loaded, no need to redirect
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trade - Demo Forex Platform</title>
+  <link rel="stylesheet" href="assets/css/style.css">
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 text-gray-800">
-  <div class="max-w-3xl mx-auto mt-6 bg-white rounded-2xl shadow-lg p-6">
+  <div class="max-w-3xl mx-auto mt-6 bg-white rounded-2xl shadow-lg p-6" style="margin-bottom: 80px;">
     
     <!-- Account Summary -->
     <div class="text-center border-b pb-4 mb-4">
@@ -37,6 +36,30 @@ if (!isset($_SESSION['balance'])) {
         <!-- Dynamic positions will be loaded here -->
       </div>
     </div>
+  </div>
+
+  <!-- Mobile Navigation -->
+  <div class="mobile-nav">
+    <a class="mobile-nav-item" href="index.php#quotes">
+      <span class="nav-icon">⇅</span>
+      <span>Quotes</span>
+    </a>
+    <a class="mobile-nav-item" href="index.php#chart">
+      <span class="nav-icon">⌭</span>
+      <span>Chart</span>
+    </a>
+    <a class="mobile-nav-item active" href="trade.php">
+      <span class="nav-icon">≡</span>
+      <span>Trade</span>
+    </a>
+    <a class="mobile-nav-item" href="trades_view.php">
+      <span class="nav-icon">⏱</span>
+      <span>History</span>
+    </a>
+    <a class="mobile-nav-item" href="info.php">
+      <span class="nav-icon">⚙</span>
+      <span>Settings</span>
+    </a>
   </div>
 
   <script>

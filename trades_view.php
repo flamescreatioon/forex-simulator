@@ -1,7 +1,7 @@
 <?php
-session_start();
-// Use existing session trades without generating new ones
-$trades = $_SESSION['trades'] ?? [];
+require_once 'includes/session.php';
+// Use existing session trades (defaults already loaded)
+$trades = $_SESSION['trades'];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -11,7 +11,7 @@ $trades = $_SESSION['trades'] ?? [];
   <title>Trades History</title>
   <link rel="stylesheet" href="assets/css/style.css" />
   <style>
-    .container-small { max-width: 960px; margin: 24px auto; padding: 16px; }
+    .container-small { max-width: 960px; margin: 24px auto; padding: 16px; margin-bottom: 80px; }
     .toolbar { display:flex; justify-content: space-between; align-items:center; margin-bottom:12px; }
     .btn { display:inline-block; padding:8px 12px; border-radius:6px; background:#2c7be5; color:#fff; text-decoration:none; }
     .btn.secondary { background:#6c757d; }
@@ -53,6 +53,30 @@ $trades = $_SESSION['trades'] ?? [];
         </tbody>
       </table>
     <?php endif; ?>
+  </div>
+
+  <!-- Mobile Navigation -->
+  <div class="mobile-nav">
+    <a class="mobile-nav-item" href="index.php#quotes">
+      <span class="nav-icon">⇅</span>
+      <span>Quotes</span>
+    </a>
+    <a class="mobile-nav-item" href="index.php#chart">
+      <span class="nav-icon">⌭</span>
+      <span>Chart</span>
+    </a>
+    <a class="mobile-nav-item" href="trade.php">
+      <span class="nav-icon">≡</span>
+      <span>Trade</span>
+    </a>
+    <a class="mobile-nav-item active" href="trades_view.php">
+      <span class="nav-icon">⏱</span>
+      <span>History</span>
+    </a>
+    <a class="mobile-nav-item" href="info.php">
+      <span class="nav-icon">⚙</span>
+      <span>Settings</span>
+    </a>
   </div>
 
   <script>

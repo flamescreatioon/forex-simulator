@@ -1,6 +1,6 @@
 <?php
 // index.php - Main Trading Platform Interface
-session_start();
+require 'includes/session.php';
 
 // Mock data for demonstration
 require 'helpers/currency_helpers.php';
@@ -10,7 +10,9 @@ require 'helpers/currency_helpers.php';
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <title>Forex Trading Platform</title>
     <link rel="stylesheet" href="assets/css/style.css">
     
@@ -31,9 +33,9 @@ require 'helpers/currency_helpers.php';
                         <?php echo $currency_symbols[0].' '.$timeframes[4].' '. $currency_names[$currency_symbols[0]]; ?>
                     </div>
                     <div class="chart-container">
-                        <!-- <div class="chart-placeholder">
-                            <p>Chart visualization would go here (requires charting library like TradingView or Chart.js)</p>
-                        </div> -->
+                        <div id="chart-fallback" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#666;font-size:14px;">
+                            If the chart doesn’t appear, open this site via http://localhost/new_forex/ (not file preview). PHP endpoints must run on a server.
+                        </div>
                     </div>
                 </div>
 
@@ -176,23 +178,24 @@ require 'helpers/currency_helpers.php';
     <!-- Mobile Navigation -->
     <div class="mobile-nav">
         <a class="mobile-nav-item active" href="#quotes">
-            <span>📊</span>
+            <span class="nav-icon">⇅</span>
             <span>Quotes</span>
         </a>
         <a class="mobile-nav-item" href="#chart">
-            <span>📈</span>
+            <span class="nav-icon">⌭</span>
             <span>Chart</span>
         </a>
         <a class="mobile-nav-item" href="trade.php">
-            <span>≡</span>
+            <span class="nav-icon">≡</span>
             <span>Trade</span>
+             
         </a>
         <a class="mobile-nav-item" href="trades_view.php">
-            <span>🕐</span>
+            <span class="nav-icon">⏱</span>
             <span>History</span>
         </a>
         <a class="mobile-nav-item" href="info.php">
-            <span>⚙</span>
+            <span class="nav-icon">⚙</span>
             <span>Settings</span>
         </a>
     </div>
@@ -210,17 +213,27 @@ require 'helpers/currency_helpers.php';
                 </div>
                 <div class="form-group">
                     <label class="form-label">Volume</label>
-                    <input type="number" class="form-input" value="0.01" step="0.01">
+                    <input type="number" id="volumeInput" class="form-input" value="<?php echo $_SESSION['default_lot_size'] ?? 0.01; ?>" step="0.01">
                     <small>1 000.00 AUD</small>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Stop Loss</label>
-                    <input type="text" class="form-input" placeholder="-">
+                    <label class="form-label">Stop Loss (pips)</label>
+                    <input type="number" id="stopLossInput" class="form-input" value="<?php echo $_SESSION['stop_loss_pips'] ?? 0; ?>" placeholder="Pips from entry">
+                    <small id="slPrice" style="color: #888;"></small>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Take Profit</label>
-                    <input type="text" class="form-input" placeholder="-">
+                    <label class="form-label">Take Profit (pips)</label>
+                    <input type="number" id="takeProfitInput" class="form-input" value="<?php echo $_SESSION['take_profit_pips'] ?? 0; ?>" placeholder="Pips from entry">
+                    <small id="tpPrice" style="color: #888;"></small>
                 </div>
+                <?php if (($_SESSION['trailing_stop'] ?? 0) == 1): ?>
+                <div class="form-group">
+                    <label class="form-label">
+                        <input type="checkbox" id="trailingStopCheck" checked> Trailing Stop Enabled
+                    </label>
+                    <small>Stop loss will follow price as it moves in your favor</small>
+                </div>
+                <?php endif; ?>
                 <div class="form-group">
                     <label class="form-label">Comment</label>
                     <input type="text" class="form-input">
@@ -239,8 +252,23 @@ require 'helpers/currency_helpers.php';
         </div>
     </div>
     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <script>
+        // Transfer settings from cookies to sessionStorage for JavaScript access
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+        
+        const simSpeed = getCookie('sim_speed');
+        const priceVolatility = getCookie('price_volatility');
+        
+        if (simSpeed) sessionStorage.setItem('sim_speed', simSpeed);
+        if (priceVolatility) sessionStorage.setItem('price_volatility', priceVolatility);
+    </script>
     <!-- Load the application as a module. app.js imports the chart controller. -->
     <script type="module" src="assets/js/app.js"></script>
-    <script src="controllers/updateController.js"></script>
+    <script src="controllers/updateController.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

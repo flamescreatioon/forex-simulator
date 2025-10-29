@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Trading App Mock — Volatility 75</title>
+
+<!-- Montserrat font like screenshot -->
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg: #f5f7fb;
+    --card: #ffffff;
+    --muted: #777c86;
+    --blue: #0b86ff; /* bright blue used for amounts & links */
+    --accent-dark: #0e2a3b;
+    --shadow: 0 6px 18px rgba(15,20,30,0.06);
+    --radius: 12px;
+  }
+
+  html,body{
+    height:100%;
+    margin:0;
+    font-family: "Montserrat", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background: linear-gradient(180deg,var(--bg),#eef2f8 80%);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    color:var(--accent-dark);
+  }
+
+  /* center the phone mock on page for demo */
+  .phone-wrap{
+    max-width:420px;
+    margin:28px auto;
+    padding:18px;
+  }
+
+  /* phone shell */
+  .phone {
+    background: #e6ecf6;
+    border-radius: 22px;
+    padding: 12px;
+    box-shadow: 0 10px 30px rgba(20,30,60,0.08);
+  }
+
+  /* inner app surface */
+  .app {
+    width: 360px;
+    max-width:100%;
+    background: var(--card);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+
+  /* Header with top balance line */
+  .app-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid #eef2f6;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+  }
+  .account-total {
+    text-align:center;
+    flex:1;
+  }
+  .account-total h1{
+    margin:0;
+    font-size:20px;
+    color: #1c6bd6; /* bluish for the top total */
+    font-weight:700;
+  }
+  .account-meta {
+    display:flex;
+    gap:12px;
+    align-items:center;
+    justify-content:flex-end;
+  }
+  .meta-list{
+    text-align:right;
+    font-size:13px;
+    color:var(--muted);
+    line-height:1.1;
+  }
+  .meta-list b{ color:#111; font-weight:600; display:block; font-size:13px; }
+
+  /* Plus button */
+  .add-btn{
+    width:34px;
+    height:34px;
+    border-radius:8px;
+    display:inline-grid;
+    place-items:center;
+    background:#fff;
+    border:1px solid #e6eefb;
+    box-shadow: 0 2px 6px rgba(10,20,40,0.04);
+  }
+  .add-btn svg{ width:18px; height:18px; fill:var(--blue); }
+
+  /* Positions header */
+  .positions-title{
+    padding:12px 16px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.00), rgba(0,0,0,0.00));
+    font-weight:700;
+    color:#222;
+    border-bottom:1px solid #f0f3f7;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+
+  /* List of positions */
+  .positions{
+    max-height:520px;
+    overflow:auto;
+  }
+
+  .position-row{
+    display:grid;
+    grid-template-columns: 1fr auto;
+    gap:12px;
+    align-items:center;
+    padding:14px 16px;
+    border-bottom:1px solid #f2f5f9;
+  }
+
+  .pos-left{
+    display:flex;
+    flex-direction:column;
+  }
+  .pos-title{
+    font-weight:700;
+    font-size:15px;
+    letter-spacing: -0.2px;
+    color:#0b2540;
+  }
+  .pos-action{
+    color:var(--blue);
+    font-weight:700;
+    margin-left:8px;
+    font-size:14px;
+  }
+  .pos-sub{
+    margin-top:6px;
+    color:var(--muted);
+    font-size:13px;
+  }
+
+  .pos-right{
+    text-align:right;
+  }
+  .pos-amount{
+    font-weight:800;
+    font-size:20px;
+    color:var(--blue);
+    letter-spacing:0.3px;
+  }
+
+  /* bottom nav mimic */
+  .bottom-nav{
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+    padding:10px 0;
+    border-top:1px solid #f0f3f7;
+    background:linear-gradient(180deg,#fff,#fbfdff);
+  }
+  .nav-item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    font-size:11px;
+    color:var(--muted);
+    gap:6px;
+  }
+  .nav-item svg{ width:18px; height:18px; opacity:0.9; }
+
+  /* scrollbar styling for demo */
+  .positions::-webkit-scrollbar { width:8px; }
+  .positions::-webkit-scrollbar-thumb { background:#e1e6ee; border-radius:8px; }
+  .positions::-webkit-scrollbar-track { background:transparent; }
+
+  /* utility */
+  .muted { color:var(--muted); font-weight:400; }
+  .small { font-size:13px; }
+  @media (max-width:420px){
+    .phone-wrap{ padding:8px; }
+    .app{ border-radius:12px; }
+  }
+</style>
+</head>
+
+<body>
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="app" role="main" aria-label="Trading App Mock">
+
+        <!-- HEADER -->
+        <div class="app-header">
+          <!-- left: small card icon -->
+          <div style="display:flex;align-items:center;gap:12px;">
+            <svg width="26" height="18" viewBox="0 0 24 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+              <rect x="0.5" y="1" width="23" height="12" rx="2" fill="#eef6ff"/>
+              <rect x="1.5" y="3" width="8" height="2" rx="1" fill="#dbefff"/>
+            </svg>
+          </div>
+
+          <!-- center total -->
+          <div class="account-total">
+            <h1>105 776.40 USD</h1>
+          </div>
+
+          <!-- right meta + add -->
+          <div class="account-meta">
+            <div class="meta-list">
+              <div><span class="small muted">Balance:</span> <b>4 068.67</b></div>
+              <div><span class="small muted">Equity:</span> <b>109 845.07</b></div>
+              <div style="margin-top:4px;"><span class="small muted">Margin:</span> <b>330.84</b></div>
+              <div style="margin-top:4px;"><span class="small muted">Free Margin:</span> <b>3 737.83</b></div>
+              <div style="margin-top:4px;"><span class="small muted">Margin Level (%):</span> <b>33 201.87</b></div>
+            </div>
+
+            <div class="add-btn" title="Add account">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                <path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Positions title -->
+        <div class="positions-title">
+          <div>Positions</div>
+          <div style="opacity:0.55">•••</div>
+        </div>
+
+        <!-- Positions list -->
+        <div class="positions" id="positions-list" role="list">
+          <!-- JS will populate rows -->
+        </div>
+
+        <!-- bottom nav (mimic) -->
+        <div class="bottom-nav">
+          <div class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M12 3v18" stroke="#9aa6b3" stroke-width="1.5" fill="none"/></svg>
+            <span>Quotes</span>
+          </div>
+          <div class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M3 12h18" stroke="#9aa6b3" stroke-width="1.5" fill="none"/></svg>
+            <span>Chart</span>
+          </div>
+          <div class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M6 6h12v12H6z" stroke="#1c6bd6" stroke-width="1.8" fill="none"/></svg>
+            <span style="color:#1c6bd6; font-weight:700">Trade</span>
+          </div>
+          <div class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M12 5v7l3 3" stroke="#9aa6b3" stroke-width="1.5" fill="none"/></svg>
+            <span>History</span>
+          </div>
+          <div class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M12 2l2 4 4 2-4 2-2 4-2-4-4-2 4-2 2-4z" stroke="#9aa6b3" stroke-width="1.2" fill="none"/></svg>
+            <span>Settings</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+<script>
+/*
+ Populate the positions list to replicate your screenshot.
+ Each row shows:
+  - Instrument name + "buy 20" (blue)
+  - Price range as small muted text
+  - Right-side amount in bold blue
+*/
+
+const positionsContainer = document.getElementById('positions-list');
+
+// sample data pulled from screenshot — repeated rows
+const rows = [
+  { title: 'Volatility 75 (1s) Index', action: 'buy 20', from: '3077.89', to: '3569.59', amount: '9 834.00' },
+  { title: 'Volatility 75 (1s) Index', action: 'buy 20', from: '3077.89', to: '3569.59', amount: '9 834.00' },
+  { title: 'Volatility 75 (1s) Index', action: 'buy 20', from: '3077.61', to: '3569.59', amount: '9 839.60' },
+  // add several similar rows to match scroll look
+];
+
+for(let i=0;i<8;i++){
+  // cycle through sample rows to make list longer
+  const base = rows[i % rows.length];
+  const row = document.createElement('div');
+  row.className = 'position-row';
+  row.setAttribute('role','listitem');
+
+  row.innerHTML = `
+    <div class="pos-left">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div class="pos-title">${base.title} <span class="pos-action">${base.action}</span></div>
+      </div>
+      <div class="pos-sub">${base.from} &rarr; ${base.to}</div>
+    </div>
+    <div class="pos-right">
+      <div class="pos-amount">${base.amount}</div>
+    </div>
+  `;
+
+  positionsContainer.appendChild(row);
+}
+</script>
+</body>
+</html>

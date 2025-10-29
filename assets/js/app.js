@@ -1,9 +1,17 @@
-import { initChart } from '../../controllers/chartControllers.js';
+// Use absolute path to avoid relative resolution issues in some servers
+import { initChart } from '/new_forex/controllers/chartControllers.js?v=1';
+
+console.log('app.js module loaded');
+console.log('initChart imported:', typeof initChart);
 
 // Expose UI functions to window so inline handlers in the PHP templates keep working.
 window.openOrderModal = function openOrderModal() {
     const orderModal = document.getElementById('orderModal');
-    if (orderModal) orderModal.classList.add('active');
+    if (orderModal) {
+        orderModal.classList.add('active');
+        // Update SL/TP price calculations when modal opens
+        updateSlTpPrices();
+    }
 };
 
 window.closeOrderModal = function closeOrderModal() {
@@ -11,12 +19,56 @@ window.closeOrderModal = function closeOrderModal() {
     if (orderModal) orderModal.classList.remove('active');
 };
 
+// Calculate actual price levels from pips
+function updateSlTpPrices() {
+    const stopLossInput = document.getElementById('stopLossInput');
+    const takeProfitInput = document.getElementById('takeProfitInput');
+    const slPrice = document.getElementById('slPrice');
+    const tpPrice = document.getElementById('tpPrice');
+    
+    if (!stopLossInput || !takeProfitInput || !slPrice || !tpPrice) return;
+    
+    // Get current market prices from modal (you can adjust this based on buy/sell)
+    const sellBtn = document.querySelector('.sell-btn .price-value');
+    const buyBtn = document.querySelector('.buy-btn .price-value');
+    
+    if (!sellBtn || !buyBtn) return;
+    
+    const currentSellPrice = parseFloat(sellBtn.textContent);
+    const currentBuyPrice = parseFloat(buyBtn.textContent);
+    const avgPrice = (currentSellPrice + currentBuyPrice) / 2;
+    
+    // Calculate pip value (for most pairs, 1 pip = 0.0001, for JPY pairs = 0.01)
+    const pipValue = 0.0001; // Adjust if pair contains JPY
+    
+    // Update SL price
+    const slPips = parseFloat(stopLossInput.value) || 0;
+    if (slPips > 0) {
+        const slLevel = avgPrice - (slPips * pipValue);
+        slPrice.textContent = `≈ ${slLevel.toFixed(5)}`;
+    } else {
+        slPrice.textContent = '';
+    }
+    
+    // Update TP price
+    const tpPips = parseFloat(takeProfitInput.value) || 0;
+    if (tpPips > 0) {
+        const tpLevel = avgPrice + (tpPips * pipValue);
+        tpPrice.textContent = `≈ ${tpLevel.toFixed(5)}`;
+    } else {
+        tpPrice.textContent = '';
+    }
+}
+
 window.selectSymbol = function selectSymbol(symbol) {
     console.log('Selected symbol:', symbol);
     // TODO: wire symbol change into chart update when that feature is added
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOMContentLoaded fired');
+    console.log('LightweightCharts available:', typeof LightweightCharts);
+    
     // Close modal when clicking outside
     const orderModal = document.getElementById('orderModal');
     if (orderModal) {
@@ -45,6 +97,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
+    
+    // Add event listeners to SL/TP inputs to update price calculations
+    const stopLossInput = document.getElementById('stopLossInput');
+    const takeProfitInput = document.getElementById('takeProfitInput');
+    if (stopLossInput) stopLossInput.addEventListener('input', updateSlTpPrices);
+    if (takeProfitInput) takeProfitInput.addEventListener('input', updateSlTpPrices);
 
     // Simulate real-time price updates
     setInterval(() => {
@@ -108,6 +166,53 @@ document.addEventListener('DOMContentLoaded', () => {
     // activate a default tab (first .panel-tab with .active or the first tab)
     (document.querySelector('.panel-tab.active') || panel_tabs[0])?.click();
 
+    // Mobile: Toggle symbol list visibility
+    const chartHeader = document.querySelector('.chart-header');
+    const symbolList = document.querySelector('.symbol-list');
+    if (chartHeader && symbolList && window.innerWidth <= 768) {
+        chartHeader.style.cursor = 'pointer';
+        chartHeader.addEventListener('click', () => {
+            symbolList.classList.toggle('show');
+        });
+    }
+
+    // Mobile navigation active state based on hash or current page
+    const updateMobileNavActive = () => {
+        const mobileNavItems = document.querySelectorAll('.mobile-nav-item');
+        const currentHash = window.location.hash;
+        const currentPath = window.location.pathname;
+        const currentPage = currentPath.split('/').pop() || 'index.php';
+        
+        mobileNavItems.forEach(item => {
+            item.classList.remove('active');
+            const href = item.getAttribute('href');
+            
+            // Check if it's a hash link and matches current hash
+            if (href && href.startsWith('#') && href === currentHash) {
+                item.classList.add('active');
+            }
+            // Check if the href contains the current page name
+            else if (href && !href.startsWith('#')) {
+                const linkPage = href.split('/').pop().split('?')[0];
+                if (linkPage && currentPage.includes(linkPage)) {
+                    item.classList.add('active');
+                }
+            }
+            // Default to quotes on index page with no hash
+            else if (currentPage.includes('index.php') && !currentHash && href === '#quotes') {
+                item.classList.add('active');
+            }
+        });
+    };
+
+    // Update active state on hash change
+    window.addEventListener('hashchange', updateMobileNavActive);
+    updateMobileNavActive();
+
     // Initialize chart after DOM is ready. Errors are logged to console.
-    initChart('.chart-container').catch(err => console.error('Chart init failed:', err));
+    console.log('About to initialize chart...');
+    console.log('Chart container exists:', !!document.querySelector('#chart .chart-container'));
+    initChart() // use default selector inside the chart module for robustness
+        .then(result => console.log('Chart initialized successfully:', result))
+        .catch(err => console.error('Chart init failed:', err));
 });

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Module Import Test</title>
+</head>
+<body>
+    <h1>Testing ES6 Module Import</h1>
+    <div id="output"></div>
+    
+    <script type="module">
+        console.log('Module script started');
+        document.getElementById('output').innerHTML = 'Module script loaded<br>';
+        
+        try {
+            const { initChart } = await import('./controllers/chartControllers.js');
+            console.log('Import successful, initChart:', typeof initChart);
+            document.getElementById('output').innerHTML += 'Import successful! initChart type: ' + typeof initChart;
+        } catch (err) {
+            console.error('Import failed:', err);
+            document.getElementById('output').innerHTML += '<span style="color:red">Import failed: ' + err.message + '</span>';
+        }
+    </script>
+</body>
+</html>

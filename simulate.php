@@ -1,6 +1,6 @@
 <?php
 // Start the session to persist values between requests
-session_start();
+require_once 'includes/session.php';
 require_once 'includes/db.php';
 header('Content-Type: application/json');
 // Don't leak PHP warnings/notices into JSON responses
@@ -8,16 +8,23 @@ header('Content-Type: application/json');
 @error_reporting(E_ERROR | E_PARSE);
 $session_id = session_id();
 
-// Retrieve persisted values or set defaults
-$balance = $_SESSION["balance"] ?? 10000;     // current account balance
-$profit = $_SESSION["profit"] ?? 0;           // accumulated profit (separately tracked)
-$goal = $_SESSION["goal"] ?? 20000;           // target balance goal
-$margin = $_SESSION["margin"] ?? ($balance * 0.1); // used margin (default 10% of balance)
-$leverage = $_SESSION["leverage"] ?? 0;       // unused in this snippet but persisted if set
+// Use session values (defaults already loaded from includes/defaults.php)
+$balance = $_SESSION["balance"];
+$profit = $_SESSION["profit"];
+$goal = $_SESSION["goal"];
+$margin = $_SESSION["margin"];
+$leverage = $_SESSION["leverage"];
+$price_volatility = $_SESSION["price_volatility"] ?? 1.0; // volatility multiplier
+$sim_speed = $_SESSION["sim_speed"] ?? 'normal'; // simulation speed
+
+// Adjust increment based on volatility setting
+$base_increment = 50;
+$max_increment = 500;
+$increment_range = ($max_increment - $base_increment) * $price_volatility;
 
 // If balance is below the goal, simulate a profit increment and update balance & profit
 if ($balance < $goal) {
-    $increment = rand(50, 500);   // random simulated gain
+    $increment = rand($base_increment, $base_increment + $increment_range);
     $profit = $profit + $increment;
     $balance = $balance + $increment;
     // Persist updated values to session

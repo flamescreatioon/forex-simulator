@@ -1,7 +1,7 @@
 <?php
 
 $currency_symbols = [
-    'AUDCAD', 'AUDCHF', 'AUDDKK', 'AUDHKD', 'AUDHUF',
+    'EURUSD', 'AUDCAD', 'AUDCHF', 'AUDDKK', 'AUDHKD', 'AUDHUF',
     'AUDJPY', 'AUDNOK', 'AUDNZD', 'AUDPLN', 'AUDSEK',
     'AUDSGD', 'AUDTRY', 'AUDUSD', 'CADCHF', 'CADHKD',
     'CADHUF', 'CADJPY', 'CADNOK', 'CADPLN', 'CADSEK',
@@ -9,7 +9,7 @@ $currency_symbols = [
     'CHFSEK', 'EURAUD', 'EURCAD', 'EURCHF', 'EURCZK',
     'EURDKK', 'EURGBP', 'EURHKD', 'EURHUF', 'EURJPY',
     'EURNOK', 'EURNZD', 'EURPLN', 'EURSEK', 'EURTRY',
-    'EURUSD', 'GBPAUD', 'GBPCAD', 'GBPCHF', 'GBPDKK',
+    'GBPAUD', 'GBPCAD', 'GBPCHF', 'GBPDKK',
     'GBPHKD', 'GBPHUF', 'GBPJPY', 'GBPNOK', 'GBPPLN',
     'GBPSEK',  'GBPTRY',  'GBPUSD',  'USDCAD',  'USDCHF',
     'USDCZK',  'USDDKK',  'USDHKD',  'USDHUF',  'USDJPY',
@@ -98,6 +98,7 @@ $account = [
 ];
 
 $currency_pairs = [
+    ['symbol' => 'EURUSD', 'bid' => 1.08501, 'ask' => 1.08503, 'change' => 0.15, 'direction' => 'up'],
     ['symbol' => 'AUDCAD', 'bid' => 0.91162, 'ask' => 0.91175, 'change' => 0.41, 'direction' => 'up'],
     ['symbol' => 'AUDCHF', 'bid' => 0.51828, 'ask' => 0.51841, 'change' => 0.41, 'direction' => 'down'],
     ['symbol' => 'AUDDKK', 'bid' => 4.45852, 'ask' => 4.46016, 'change' => 0, 'direction' => 'neutral'],

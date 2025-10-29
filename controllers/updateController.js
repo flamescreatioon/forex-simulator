@@ -55,6 +55,12 @@ function updateTrades(){
         })
         .catch(err => console.error("Error fetching trades: ", err));
 }
-setInterval(updateTrades, 2000); // Update every 2 seconds
-setInterval(updateDashboard, 2000); // Update every 2 seconds
+
+// Get update interval based on simulation speed
+const simSpeed = sessionStorage.getItem('sim_speed') || 'normal';
+const intervalMap = { 'slow': 5000, 'normal': 3000, 'fast': 1000 };
+const updateInterval = intervalMap[simSpeed] || 3000;
+
+setInterval(updateTrades, updateInterval);
+setInterval(updateDashboard, updateInterval);
 updateDashboard();

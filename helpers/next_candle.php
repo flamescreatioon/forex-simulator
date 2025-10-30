@@ -9,12 +9,25 @@ if (session_status() === PHP_SESSION_NONE) {
 
 header('Content-Type: application/json');
 
+// Resolve requested pair (default to first configured or EUR/USD)
+$requestedPair = isset($_GET['pair']) ? strtoupper(str_replace(' ', '', $_GET['pair'])) : '';
+if ($requestedPair && strpos($requestedPair, '/') === false && strlen($requestedPair) === 6) {
+    $requestedPair = substr($requestedPair, 0, 3) . '/' . substr($requestedPair, 3);
+}
+$pairsList = isset($_SESSION['pairs']) && is_array($_SESSION['pairs']) ? $_SESSION['pairs'] : ['EUR/USD'];
+if ($requestedPair === '' || !in_array($requestedPair, $pairsList, true)) {
+    $requestedPair = $pairsList[0];
+}
+$pairKey = str_replace('/', '_', $requestedPair);
+if (!isset($_SESSION['chart_state'])) { $_SESSION['chart_state'] = []; }
+
 // Helper function to generate a single candle with 70% up-bias and mean reversion
 function generateCandle($base, $time) {
+    global $pairKey;
     $volatility = isset($_SESSION['price_volatility']) ? floatval($_SESSION['price_volatility']) : 1.0;
     if ($volatility <= 0) $volatility = 1.0;
 
-    $anchor = isset($_SESSION['candle_anchor']) ? floatval($_SESSION['candle_anchor']) : $base;
+    $anchor = isset($_SESSION['chart_state'][$pairKey]['anchor']) ? floatval($_SESSION['chart_state'][$pairKey]['anchor']) : $base;
     $channel_width = isset($_SESSION['channel_width']) ? floatval($_SESSION['channel_width']) : 0.015; // ~150 pips
 
     $ratio = 0.0;
@@ -43,7 +56,7 @@ function generateCandle($base, $time) {
 
     // update anchor (EMA)
     $anchor = 0.99 * $anchor + 0.01 * $close;
-    $_SESSION['candle_anchor'] = $anchor;
+    $_SESSION['chart_state'][$pairKey]['anchor'] = $anchor;
 
     return [
         'time' => $time,
@@ -55,7 +68,7 @@ function generateCandle($base, $time) {
 }
 
 // Initialize candle data if not exists
-if (!isset($_SESSION['candle_data']) || !isset($_SESSION['candle_base_price'])) {
+if (!isset($_SESSION['chart_state'][$pairKey]['data']) || !isset($_SESSION['chart_state'][$pairKey]['base_price'])) {
     // Return empty - client should load initial candles first
     echo json_encode(['error' => 'No initial data']);
     exit;
@@ -82,25 +95,27 @@ if (($current_time - $last_update) < $required_interval) {
 }
 
 // Time to generate a new candle
-$base = $_SESSION['candle_base_price'];
-$last_time = $_SESSION['last_candle_time'] ?? time();
-$new_time = $last_time + 60; // Each candle is 1 minute
+$tfSeconds = isset($_SESSION['chart_tf_seconds']) ? intval($_SESSION['chart_tf_seconds']) : 60;
+if ($tfSeconds <= 0) { $tfSeconds = 60; }
+$base = $_SESSION['chart_state'][$pairKey]['base_price'];
+$last_time = $_SESSION['chart_state'][$pairKey]['last_time'] ?? time();
+$new_time = $last_time + $tfSeconds; // Each candle advances by timeframe seconds
 
 // Generate new candle
 $newCandle = generateCandle($base, $new_time);
 
 // Add to session data
-$_SESSION['candle_data'][] = $newCandle;
+$_SESSION['chart_state'][$pairKey]['data'][] = $newCandle;
 
 // Keep only last 200 candles to prevent memory bloat
-if (count($_SESSION['candle_data']) > 200) {
-    $_SESSION['candle_data'] = array_slice($_SESSION['candle_data'], -200);
+if (count($_SESSION['chart_state'][$pairKey]['data']) > 200) {
+    $_SESSION['chart_state'][$pairKey]['data'] = array_slice($_SESSION['chart_state'][$pairKey]['data'], -200);
 }
 
 // Update state
-$_SESSION['candle_base_price'] = $newCandle['close'];
-$_SESSION['last_candle_time'] = $new_time;
-$_SESSION['last_candle_update'] = $current_time;
+$_SESSION['chart_state'][$pairKey]['base_price'] = $newCandle['close'];
+$_SESSION['chart_state'][$pairKey]['last_time'] = $new_time;
+$_SESSION['chart_state'][$pairKey]['last_update'] = $current_time;
 
 // Clear any output buffers that might have errors
 while (ob_get_level()) {

@@ -97,3 +97,32 @@ if (!isset($_SESSION['positions'])) {
 if (!isset($_SESSION['trades'])) {
     $_SESSION['trades'] = [];
 }
+
+// Positions simulation defaults (for trades.php)
+if (!isset($_SESSION['positions_count'])) {
+    // Desired number of concurrent demo positions
+    $_SESSION['positions_count'] = $_SESSION['max_positions'] ?? 5;
+}
+
+if (!isset($_SESSION['profit_bias'])) {
+    // Probability [0..1] that the next update nudges profit positively
+    $_SESSION['profit_bias'] = 0.75; // mainly profits
+}
+
+if (!isset($_SESSION['profit_scale'])) {
+    // Multiplier for profit magnitude per pip step (1.0 = normal)
+    $_SESSION['profit_scale'] = 1.0;
+}
+
+// Instruments/pairs defaults (used by trades and quotes)
+if (!isset($_SESSION['pairs']) || !is_array($_SESSION['pairs']) || empty($_SESSION['pairs'])) {
+    $_SESSION['pairs'] = ['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD', 'USD/CAD', 'USD/CHF', 'NZD/USD', 'GBP/JPY'];
+}
+
+// Chart timeframe defaults
+if (!isset($_SESSION['chart_timeframe'])) {
+    $_SESSION['chart_timeframe'] = '1m'; // 1 minute per candle
+}
+if (!isset($_SESSION['chart_tf_seconds'])) {
+    $_SESSION['chart_tf_seconds'] = 60; // seconds per candle
+}

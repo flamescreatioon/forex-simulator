@@ -22,11 +22,44 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
     $sim_speed = $_POST['sim_speed'] ?? 'normal';
     $price_volatility = floatval($_POST['price_volatility'] ?? 1.0);
     $auto_trade = isset($_POST['auto_trade']) ? 1 : 0;
+
+    // Chart Settings
+    $chart_timeframe = $_POST['chart_timeframe'] ?? ($_SESSION['chart_timeframe'] ?? '1m');
+    // Map timeframe to seconds
+    $tf_map = [ '30s' => 30, '1m' => 60, '5m' => 300, '15m' => 900, '1h' => 3600 ];
+    $chart_tf_seconds = $tf_map[$chart_timeframe] ?? 60;
+
+    // Instruments/Pairs list (comma or newline separated)
+    $pairs_text = $_POST['pairs'] ?? '';
+    $pieces = preg_split('/[\r\n,]+/', $pairs_text);
+    $pairs = [];
+    foreach ($pieces as $s) {
+        $s = trim($s);
+        if ($s === '') continue;
+        $s = strtoupper(str_replace(' ', '', $s));
+        if (strpos($s, '/') === false && strlen($s) === 6) {
+            $s = substr($s, 0, 3) . '/' . substr($s, 3);
+        }
+        if ($s !== '') $pairs[] = $s;
+    }
+    if (empty($pairs)) {
+        $pairs = $_SESSION['pairs'] ?? ['EUR/USD','GBP/USD','USD/JPY','AUD/USD','USD/CAD','USD/CHF','NZD/USD','GBP/JPY'];
+    }
     
     // Position Management
     $stop_loss_pips = floatval($_POST['stop_loss_pips'] ?? 50);
     $take_profit_pips = floatval($_POST['take_profit_pips'] ?? 100);
     $trailing_stop = isset($_POST['trailing_stop']) ? 1 : 0;
+
+    // Positions Simulation Controls
+    $positions_count = intval($_POST['positions_count'] ?? ($_SESSION['positions_count'] ?? ($_SESSION['max_positions'] ?? 5)));
+    $profit_bias_input = $_POST['profit_bias'] ?? null;
+    if ($profit_bias_input !== null) {
+        $profit_bias = max(0.0, min(1.0, floatval($profit_bias_input) / 100.0));
+    } else {
+        $profit_bias = $_SESSION['profit_bias'] ?? 0.75;
+    }
+    $profit_scale = max(0.1, min(10.0, floatval($_POST['profit_scale'] ?? ($_SESSION['profit_scale'] ?? 1.0))));
 
     if($balance <= 0 || $goal <= 0){
         $error = "Please enter valid numbers for balance and goal.";
@@ -50,11 +83,19 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
         $_SESSION["sim_speed"] = $sim_speed;
         $_SESSION["price_volatility"] = $price_volatility;
         $_SESSION["auto_trade"] = $auto_trade;
+    $_SESSION["chart_timeframe"] = $chart_timeframe;
+    $_SESSION["chart_tf_seconds"] = $chart_tf_seconds;
+    $_SESSION["pairs"] = $pairs;
         
         // Store position management
         $_SESSION["stop_loss_pips"] = $stop_loss_pips;
         $_SESSION["take_profit_pips"] = $take_profit_pips;
         $_SESSION["trailing_stop"] = $trailing_stop;
+
+    // Store positions simulation controls
+    $_SESSION["positions_count"] = $positions_count;
+    $_SESSION["profit_bias"] = $profit_bias;
+    $_SESSION["profit_scale"] = $profit_scale;
         
         // Initialize empty positions and trades if not set
         if (!isset($_SESSION['positions'])) {
@@ -65,7 +106,10 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
         }
 
         // Store settings in cookie for JavaScript access
-        setcookie('sim_speed', $sim_speed, time() + (86400 * 30), "/");
+    setcookie('sim_speed', $sim_speed, time() + (86400 * 30), "/");
+    setcookie('chart_timeframe', $chart_timeframe, time() + (86400 * 30), "/");
+    // Persist pairs to cookie as comma-separated for frontend JS
+    @setcookie('pairs', implode(',', $pairs), time() + (86400 * 30), "/");
         setcookie('price_volatility', $price_volatility, time() + (86400 * 30), "/");
 
         header("Location: index.php");
@@ -200,16 +244,51 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
                 </div>
             </div>
 
-            <!-- Simulation Settings Section -->
+            <!-- Positions Simulation Section -->
             <div class="mb-6">
-                <h2 class="text-lg font-semibold mb-3 text-gray-700 border-b pb-2">Simulation Settings</h2>
+                <h2 class="text-lg font-semibold mb-3 text-gray-700 border-b pb-2">Positions (Simulation)</h2>
+
+                <div class="mb-4">
+                    <label class="block mb-2 font-medium text-sm">Concurrent Positions</label>
+                    <input type="number" name="positions_count" min="0" max="50" value="<?= $_SESSION['positions_count'] ?? ($_SESSION['max_positions'] ?? 5) ?>" class="w-full p-2 border rounded-lg">
+                    <small class="text-gray-500">How many demo positions to maintain and update</small>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block mb-2 font-medium text-sm">Profit Bias (%)</label>
+                    <input type="number" name="profit_bias" step="1" min="0" max="100" value="<?= isset($_SESSION['profit_bias']) ? round($_SESSION['profit_bias']*100) : 75 ?>" class="w-full p-2 border rounded-lg">
+                    <small class="text-gray-500">Chance that updates push profits upward (e.g., 75 = mostly profitable)</small>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block mb-2 font-medium text-sm">Profit Scale (x)</label>
+                    <input type="number" name="profit_scale" step="0.1" min="0.1" max="10" value="<?= $_SESSION['profit_scale'] ?? 1.0 ?>" class="w-full p-2 border rounded-lg">
+                    <small class="text-gray-500">Scale profit magnitude per pip step</small>
+                </div>
+            </div>
+
+            <!-- Simulation & Chart Settings Section -->
+            <div class="mb-6">
+                <h2 class="text-lg font-semibold mb-3 text-gray-700 border-b pb-2">Simulation & Chart Settings</h2>
                 
                 <div class="mb-4">
-                    <label class="block mb-2 font-medium text-sm">Simulation Speed</label>
+                    <label class="block mb-2 font-medium text-sm">Chart Update Speed</label>
                     <select name="sim_speed" class="w-full p-2 border rounded-lg">
                         <option value="slow" <?= ($_SESSION['sim_speed'] ?? 'normal') == 'slow' ? 'selected' : '' ?>>Slow (5s updates)</option>
                         <option value="normal" <?= ($_SESSION['sim_speed'] ?? 'normal') == 'normal' ? 'selected' : '' ?>>Normal (3s updates)</option>
                         <option value="fast" <?= ($_SESSION['sim_speed'] ?? 'normal') == 'fast' ? 'selected' : '' ?>>Fast (1s updates)</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block mb-2 font-medium text-sm">Chart Timeframe</label>
+                    <select name="chart_timeframe" class="w-full p-2 border rounded-lg">
+                        <?php $ctf = $_SESSION['chart_timeframe'] ?? '1m'; ?>
+                        <option value="30s" <?= ($ctf=='30s')?'selected':'' ?>>30 seconds</option>
+                        <option value="1m" <?= ($ctf=='1m')?'selected':'' ?>>1 minute</option>
+                        <option value="5m" <?= ($ctf=='5m')?'selected':'' ?>>5 minutes</option>
+                        <option value="15m" <?= ($ctf=='15m')?'selected':'' ?>>15 minutes</option>
+                        <option value="1h" <?= ($ctf=='1h')?'selected':'' ?>>1 hour</option>
                     </select>
                 </div>
 
@@ -226,6 +305,18 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
                     </label>
                     <small class="text-gray-500 ml-6 block">Automatically generate simulated trades</small>
                 </div>
+            </div>
+
+            <!-- Instruments / Pairs Section -->
+            <div class="mb-6">
+                <h2 class="text-lg font-semibold mb-3 text-gray-700 border-b pb-2">Instruments (Pairs)</h2>
+                <div class="mb-2">
+                    <label class="block mb-2 font-medium text-sm">Symbols</label>
+                    <textarea name="pairs" rows="4" class="w-full p-2 border rounded-lg" placeholder="EUR/USD, GBP/USD, USD/JPY"><?php
+                        echo htmlspecialchars(implode(", ", $_SESSION['pairs'] ?? []));
+                    ?></textarea>
+                </div>
+                <small class="text-gray-500">Comma or newline separated. Used for positions and quotes.</small>
             </div>
 
             <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold text-lg">
@@ -256,7 +347,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
             <span class="nav-icon">⏱</span>
             <span>History</span>
         </a>
-        <a class="mobile-nav-item active" href="info.php">
+        <a class="mobile-nav-item active" href="set_params.php">
             <span class="nav-icon">⚙</span>
             <span>Settings</span>
         </a>

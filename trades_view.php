@@ -73,7 +73,7 @@ $trades = $_SESSION['trades'];
       <span class="nav-icon">⏱</span>
       <span>History</span>
     </a>
-    <a class="mobile-nav-item" href="info.php">
+    <a class="mobile-nav-item" href="set_params.php">
       <span class="nav-icon">⚙</span>
       <span>Settings</span>
     </a>

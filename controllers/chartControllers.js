@@ -72,7 +72,7 @@ export async function initChart(containerSelectorOrElement) {
     // Explicitly set container height to a stable pixel value
     chartContainer.style.height = initialHeight + 'px';
 
-    const chart = LightweightCharts.createChart(chartContainer, {
+    const createChartInstance = (container) => LightweightCharts.createChart(container, {
         layout: {
             background: { color: '#ffffff' },
             textColor: '#333',
@@ -85,7 +85,7 @@ export async function initChart(containerSelectorOrElement) {
             timeVisible: true,
             secondsVisible: false,
         },
-        width: chartContainer.clientWidth,
+        width: container.clientWidth,
         height: initialHeight,
     });
     
@@ -94,22 +94,32 @@ export async function initChart(containerSelectorOrElement) {
     // Build absolute URL to avoid any module-relative resolution quirks
     const origin = window.location.origin;
     const basePath = '/new_forex';
-    const dataUrl = `${origin}${basePath}/helpers/candles.php`;
-    console.log('Fetching candle data from:', dataUrl);
-    
-    const res = await fetch(dataUrl);
-    if (!res.ok) {
-        console.error('Failed to fetch chart data:', res.status, res.statusText);
-        throw new Error(`Failed to fetch chart data: ${res.status} ${res.statusText}`);
-    }
-    const payload = await res.json();
-    console.log('Candle data received:', payload.length, 'candles');
+    const getConfiguredPairs = () => {
+        const m = document.cookie.match(/(?:^|; )pairs=([^;]+)/);
+        if (!m) return [];
+        try {
+            const decoded = decodeURIComponent(m[1]);
+            return decoded.split(',').map(s => s.trim()).filter(Boolean);
+        } catch {
+            return [];
+        }
+    };
+
+    const pairs = getConfiguredPairs();
+
+    const fetchCandles = async (pair) => {
+        const url = `${origin}${basePath}/helpers/candles.php?pair=${encodeURIComponent(pair)}`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`Failed to fetch chart data: ${res.status}`);
+        return res.json();
+    };
 
     // The JSON file stores data under `data` and uses `timestamp` keys.
     // LightweightCharts expects an array of points with a `time` field
     // (either a unix timestamp in seconds or a date string) and OHLC keys.
-    const raw = Array.isArray(payload) ? payload : (payload && payload.data) || [];
-    let formatted = raw.map(item => {
+    const formatPayload = (payload) => {
+      const raw = Array.isArray(payload) ? payload : (payload && payload.data) || [];
+      return raw.map(item => {
         // Support both `timestamp` (ISO string) or numeric `time` values.
         let time;
         if (item.timestamp) {
@@ -132,20 +142,68 @@ export async function initChart(containerSelectorOrElement) {
             low: item.low,
             close: item.close,
         };
-    }).filter(pt => typeof pt.time === 'number' && isFinite(pt.time) &&
-                     typeof pt.open === 'number' && typeof pt.high === 'number' &&
-                     typeof pt.low === 'number' && typeof pt.close === 'number');
-    
-    console.log('Data formatted, first candle:', formatted[0], 'last candle:', formatted[formatted.length - 1]);
+      }).filter(pt => typeof pt.time === 'number' && isFinite(pt.time) &&
+                       typeof pt.open === 'number' && typeof pt.high === 'number' &&
+                       typeof pt.low === 'number' && typeof pt.close === 'number');
+    };
 
-    const candlestickSeries = chart.addSeries(LightweightCharts.CandlestickSeries);
-    if (formatted.length === 0) {
-        console.warn('No valid candle data to render. Check candles.php output.');
-    } else {
-        candlestickSeries.setData(formatted);
+    const chartInstances = [];
+    const containerForCharts = chartContainer;
+
+    // If multiple pairs are configured, render a small stack of charts (one per pair)
+    const pairsToRender = pairs.length ? pairs : ['EUR/USD'];
+
+    // Clear any existing content (if fallback or previous charts)
+    while (containerForCharts.firstChild) containerForCharts.removeChild(containerForCharts.firstChild);
+
+    for (const pair of pairsToRender) {
+        const wrapper = document.createElement('div');
+        wrapper.style.marginBottom = '16px';
+        // Label with edit button
+        const labelRow = document.createElement('div');
+        labelRow.className = 'chart-pair-label';
+        labelRow.style.display = 'flex';
+        labelRow.style.alignItems = 'center';
+        labelRow.style.justifyContent = 'space-between';
+        
+        const labelText = document.createElement('span');
+        labelText.textContent = pair;
+        labelRow.appendChild(labelText);
+        
+        const editBtn = document.createElement('button');
+        editBtn.className = 'icon-btn chart-edit-btn';
+        editBtn.setAttribute('aria-label', 'Edit');
+        editBtn.setAttribute('title', 'Edit');
+        editBtn.onclick = () => {
+            const pairsModal = document.getElementById('pairsModal');
+            if (pairsModal) pairsModal.style.display = 'block';
+        };
+        const penIcon = document.createElement('span');
+        penIcon.className = 'icon-glyph';
+        penIcon.textContent = '✎';
+        editBtn.appendChild(penIcon);
+        labelRow.appendChild(editBtn);
+        
+        wrapper.appendChild(labelRow);
+        // Chart container
+        const sub = document.createElement('div');
+        sub.style.height = initialHeight + 'px';
+        sub.style.width = '100%';
+        sub.className = 'chart-subcontainer';
+        wrapper.appendChild(sub);
+        containerForCharts.appendChild(wrapper);
+
+        const chart = createChartInstance(sub);
+        const series = chart.addSeries(LightweightCharts.CandlestickSeries);
+        try {
+            const payload = await fetchCandles(pair);
+            const formatted = formatPayload(payload);
+            if (formatted.length) series.setData(formatted);
+        } catch (e) {
+            console.warn('Fetch failed for pair', pair, e);
+        }
+        chartInstances.push({ chart, series, pair, container: sub });
     }
-    
-    console.log('Candlestick series added and data set');
 
     // Hide fallback helper if present
     const fallback = document.getElementById('chart-fallback');
@@ -158,22 +216,24 @@ export async function initChart(containerSelectorOrElement) {
         }
         const newRect = chartContainer.getBoundingClientRect();
         // Only adjust width on resize; keep height stable to avoid growth feedback
-        chart.applyOptions({ width: newRect.width });
+        chartInstances.forEach(inst => inst.chart.applyOptions({ width: newRect.width }));
     });
     resizeObserver.observe(chartContainer);
 
     // Start continuous candle generation
     console.log('Starting continuous updates...');
-    startContinuousUpdates(candlestickSeries);
+    chartInstances.forEach(inst => startContinuousUpdates(inst.series, inst.pair));
 
-    return { chart, candlestickSeries };
+    return chartInstances;
 }
 
 // Function to continuously generate and add new candles
-function startContinuousUpdates(candlestickSeries) {
+function startContinuousUpdates(candlestickSeries, pair) {
     // Get simulation speed from sessionStorage
     const getUpdateInterval = () => {
-        const simSpeed = sessionStorage.getItem('sim_speed') || 'normal';
+        // Prefer sessionStorage, fallback to cookie set via settings
+        const cookieMatch = document.cookie.match(/(?:^|; )sim_speed=([^;]+)/);
+        const simSpeed = sessionStorage.getItem('sim_speed') || (cookieMatch ? decodeURIComponent(cookieMatch[1]) : 'normal');
         const intervalMap = {
             'slow': 10000,   // 10 seconds
             'normal': 5000,  // 5 seconds
@@ -189,7 +249,7 @@ function startContinuousUpdates(candlestickSeries) {
         try {
             const origin = window.location.origin;
             const basePath = '/new_forex';
-            const nextCandleUrl = `${origin}${basePath}/helpers/next_candle.php`;
+            const nextCandleUrl = `${origin}${basePath}/helpers/next_candle.php?pair=${encodeURIComponent(pair)}`;
             const response = await fetch(nextCandleUrl, { cache: 'no-store' });
             
             if (!response.ok) {

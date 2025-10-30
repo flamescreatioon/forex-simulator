@@ -105,11 +105,74 @@ body {
 }
 
 .chart-header {
-    padding: 10px 20px;
-    border-bottom: 1px solid #e0e0e0;
+    padding: 12px 16px;
+    border-bottom: 1px solid #eceff3;
     font-size: 14px;
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fafafa;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    margin-bottom: 8px;
 }
+
+/* Hidden by default, shown on mobile */
+.mobile-pairs-btn {
+    display: none;
+    padding: 6px 10px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+/* Generic icon button (used for hamburger) */
+.icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.icon-btn:active { opacity: 0.8; }
+
+/* Simple glyph inside icon button */
+.icon-glyph {
+    font-size: 18px;
+    color: #4b5563;
+    line-height: 1;
+}
+
+.hamburger {
+    position: relative;
+    display: inline-block;
+    width: 18px;
+    height: 2px;
+    background: #4b5563; /* slate-600 */
+    border-radius: 2px;
+}
+
+.hamburger::before,
+.hamburger::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 18px;
+    height: 2px;
+    background: #4b5563;
+    border-radius: 2px;
+}
+
+.hamburger::before { top: -6px; }
+.hamburger::after { top: 6px; }
 
 .chart-container {
     flex: 1;
@@ -117,6 +180,23 @@ body {
     background: #fafafa;
     position: relative;
     min-height: 400px;
+}
+
+.chart-pair-label {
+    font-weight: 700;
+    font-size: 16px;
+    margin: 8px 12px 12px;
+    color: #1f2937;
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.chart-edit-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
 }
 
 .chart-placeholder {
@@ -378,6 +458,8 @@ body {
 
 .modal-body {
     padding: 20px;
+    max-height: 70vh;
+    overflow: hidden; /* inner list will scroll */
 }
 
 .form-group {
@@ -479,11 +561,27 @@ body {
         font-size: 13px;
     }
 
+    /* Show the Pairs button in header on mobile */
+    .mobile-pairs-btn {
+        display: inline-flex;
+    }
+
     .chart-container {
         flex: 1;
         padding: 0;
         min-height: 100%;
         height: 100%;
+    }
+
+    .chart-pair-label {
+        font-size: 18px;
+        margin: 12px 16px 16px;
+    }
+
+    .chart-edit-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 15px;
     }
 
     /* Hide symbol list on mobile */
@@ -600,4 +698,95 @@ body {
     .chart-container {
         padding: 30px;
     }
+}
+
+/* Fancy Pairs Scroll List */
+.pairs-actions {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    z-index: 1;
+}
+
+.pairs-actions .actions-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.pairs-search-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.pairs-action-btn {
+    padding: 8px 10px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    border-radius: 8px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.pairs-action-btn.primary {
+    background: #3498db;
+    border-color: #3498db;
+    color: #fff;
+}
+
+.pairs-scroll {
+    max-height: 55vh;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+.pairs-scroll::-webkit-scrollbar {
+    width: 8px;
+}
+
+.pairs-scroll::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 8px;
+}
+
+.pairs-scroll::-webkit-scrollbar-track {
+    background: #f3f4f6;
+}
+
+.pair-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border: 1px solid #eef0f3;
+    border-radius: 10px;
+    background: #fff;
+    transition: background 0.15s, border-color 0.15s;
+    margin-bottom: 8px;
+}
+
+.pair-row:hover {
+    background: #f9fafb;
+}
+
+.pair-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pair-code {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.pair-checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: #3498db;
 }

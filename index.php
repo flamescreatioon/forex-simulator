@@ -29,9 +29,6 @@ require 'helpers/currency_helpers.php';
             <div class="trading-area">
                 <!-- Chart Section -->
                 <div class="chart-section" id="chart">
-                    <div class="chart-header">
-                        <?php echo $currency_symbols[0].' '.$timeframes[4].' '. $currency_names[$currency_symbols[0]]; ?>
-                    </div>
                     <div class="chart-container">
                         <div id="chart-fallback" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#666;font-size:14px;">
                             If the chart doesn’t appear, open this site via http://localhost/new_forex/ (not file preview). PHP endpoints must run on a server.
@@ -41,8 +38,11 @@ require 'helpers/currency_helpers.php';
 
                 <!-- Symbol List -->
                 <div class="symbol-list" id="quotes">
-                    <div class="symbol-search">
-                        <input type="text" placeholder="Search symbol" id="symbolSearch">
+                    <div class="symbol-search" style="display:flex; gap:8px; align-items:center;">
+                        <input type="text" placeholder="Search symbol" id="symbolSearch" style="flex:1;">
+                        <button id="openPairsModal" class="icon-btn" aria-label="Edit" title="Edit">
+                            <span class="icon-glyph">✎</span>
+                        </button>
                     </div>
                     <div class="symbol-list-items">
                         <?php foreach ($currency_pairs as $pair): ?>
@@ -194,11 +194,51 @@ require 'helpers/currency_helpers.php';
             <span class="nav-icon">⏱</span>
             <span>History</span>
         </a>
-        <a class="mobile-nav-item" href="info.php">
+                <a class="mobile-nav-item" href="set_params.php">
             <span class="nav-icon">⚙</span>
             <span>Settings</span>
         </a>
     </div>
+
+        <!-- Pairs Selector Modal -->
+        <?php
+            $default_pairs = ['EUR/USD','GBP/USD','USD/JPY','AUD/USD','USD/CAD','USD/CHF','NZD/USD','GBP/JPY'];
+            $configured_pairs = isset($_SESSION['pairs']) && is_array($_SESSION['pairs']) ? $_SESSION['pairs'] : $default_pairs;
+            $all_pairs = array_values(array_unique(array_merge($default_pairs, $configured_pairs)));
+        ?>
+        <div id="pairsModal" class="modal" style="display:none;">
+            <div class="modal-content" style="max-width:480px;">
+                <div class="modal-header">
+                    <div class="modal-title">Select Pairs</div>
+                    <div class="modal-close" id="closePairsModal" style="cursor:pointer;">×</div>
+                </div>
+                <div class="modal-body">
+                    <div class="pairs-actions">
+                        <div class="actions-row">
+                            <input id="pairsSearch" type="text" class="pairs-search-input" placeholder="Search pairs e.g. EUR/USD" />
+                            <button id="selectAllPairs" type="button" class="pairs-action-btn">Select All</button>
+                            <button id="clearPairs" type="button" class="pairs-action-btn">Clear</button>
+                        </div>
+                    </div>
+                    <div id="pairsScroll" class="pairs-scroll">
+                        <div id="pairsList">
+                            <?php foreach ($all_pairs as $p): ?>
+                                <label class="pair-row">
+                                    <div class="pair-left">
+                                        <input type="checkbox" class="pair-checkbox" value="<?= htmlspecialchars($p) ?>">
+                                        <span class="pair-code"><?= htmlspecialchars($p) ?></span>
+                                    </div>
+                                </label>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:10px; margin-top:12px;">
+                        <button id="savePairs" class="pairs-action-btn primary" style="flex:1;">Save</button>
+                        <button id="cancelPairs" class="pairs-action-btn" style="flex:1;">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     <!-- Order Modal -->
     <div class="modal" id="orderModal">
@@ -266,6 +306,79 @@ require 'helpers/currency_helpers.php';
         
         if (simSpeed) sessionStorage.setItem('sim_speed', simSpeed);
         if (priceVolatility) sessionStorage.setItem('price_volatility', priceVolatility);
+
+
+
+        // Pairs modal handlers
+    const pairsBtn = document.getElementById('openPairsModal');
+    const pairsBtnMobile = document.getElementById('openPairsModalMobile');
+        const pairsModal = document.getElementById('pairsModal');
+    const closePairsModal = document.getElementById('closePairsModal');
+        const cancelPairs = document.getElementById('cancelPairs');
+        const savePairs = document.getElementById('savePairs');
+    const pairsSearch = document.getElementById('pairsSearch');
+    const selectAllPairs = document.getElementById('selectAllPairs');
+    const clearPairs = document.getElementById('clearPairs');
+
+        function showPairsModal() {
+            // Precheck from cookie
+            const cookie = getCookie('pairs');
+            const selected = cookie ? decodeURIComponent(cookie).split(',').map(s => s.trim()) : [];
+            document.querySelectorAll('#pairsList .pair-checkbox').forEach(cb => {
+                cb.checked = selected.includes(cb.value);
+            });
+            pairsModal.style.display = 'block';
+        }
+        function hidePairsModal() { pairsModal.style.display = 'none'; }
+    if (pairsBtn) pairsBtn.addEventListener('click', showPairsModal);
+    if (pairsBtnMobile) pairsBtnMobile.addEventListener('click', showPairsModal);
+        if (closePairsModal) closePairsModal.addEventListener('click', hidePairsModal);
+        if (cancelPairs) cancelPairs.addEventListener('click', hidePairsModal);
+        if (pairsModal) pairsModal.addEventListener('click', (e) => { if (e.target === pairsModal) hidePairsModal(); });
+
+        if (savePairs) savePairs.addEventListener('click', async () => {
+            const selected = Array.from(document.querySelectorAll('#pairsList .pair-checkbox:checked')).map(cb => cb.value);
+            try {
+                const res = await fetch('update_pairs.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pairs: selected })
+                });
+                if (!res.ok) throw new Error('Failed to update pairs');
+                const out = await res.json();
+                if (out && out.success) {
+                    // Set cookie for frontend JS consumers (charts)
+                    document.cookie = `pairs=${encodeURIComponent(selected.join(','))}; path=/; max-age=${60*60*24*30}`;
+                    hidePairsModal();
+                    // Reload to allow PHP-rendered parts to adapt if needed
+                    window.location.reload();
+                }
+            } catch (e) {
+                alert('Could not save pairs');
+            }
+        });
+
+        // Filtering and bulk actions
+        if (pairsSearch) {
+            pairsSearch.addEventListener('input', () => {
+                const q = pairsSearch.value.toLowerCase();
+                document.querySelectorAll('#pairsList .pair-row').forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(q) ? '' : 'none';
+                });
+            });
+        }
+
+        if (selectAllPairs) {
+            selectAllPairs.addEventListener('click', () => {
+                document.querySelectorAll('#pairsList .pair-checkbox').forEach(cb => cb.checked = true);
+            });
+        }
+        if (clearPairs) {
+            clearPairs.addEventListener('click', () => {
+                document.querySelectorAll('#pairsList .pair-checkbox').forEach(cb => cb.checked = false);
+            });
+        }
     </script>
     <!-- Load the application as a module. app.js imports the chart controller. -->
     <script type="module" src="assets/js/app.js"></script>

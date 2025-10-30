@@ -13,7 +13,11 @@ require 'helpers/currency_helpers.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#3498db">
     <title>Forex Trading Platform</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" sizes="192x192" href="assets/icons/icon-192.png">
+    <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
     <link rel="stylesheet" href="assets/css/style.css">
     
 </head>
@@ -291,7 +295,32 @@ require 'helpers/currency_helpers.php';
             </div>
         </div>
     </div>
-    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+        <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+        <script>
+            // Register service worker
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/new_forex/service-worker.js').catch(console.error);
+                });
+            }
+
+            // Handle PWA install prompt (optional UI hook)
+            let deferredPrompt;
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                // You can show a custom install button and call prompt() on click
+                // Example: document.getElementById('installBtn').style.display = 'block';
+            });
+
+            async function triggerInstall() {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    deferredPrompt = null;
+                }
+            }
+        </script>
     <script>
         // Transfer settings from cookies to sessionStorage for JavaScript access
         function getCookie(name) {

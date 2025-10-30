@@ -1,0 +1,23 @@
+{
+  "name": "Forex Trading Platform",
+  "short_name": "Forex",
+  "description": "Lightweight demo forex trading platform with live charts and positions.",
+  "start_url": "/new_forex/index.php",
+  "scope": "/new_forex/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3498db",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

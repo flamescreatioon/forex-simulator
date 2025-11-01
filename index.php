@@ -295,34 +295,10 @@ require 'helpers/currency_helpers.php';
             </div>
         </div>
     </div>
-        <script>
-            // Ensure LightweightCharts is available before loading the app module.
-            (function loadChartsAndApp(){
-                function loadScript(src, cb){
-                    var s=document.createElement('script');
-                    s.src=src; s.async=true; s.onload=function(){cb(true)}; s.onerror=function(){cb(false)}; document.head.appendChild(s);
-                }
-                function loadApp(){
-                    // Inject module script dynamically so it runs after the chart lib is present
-                    var m=document.createElement('script');
-                    m.type='module';
-                    m.src='assets/js/app.js';
-                    document.body.appendChild(m);
-                }
-                // Try local vendor copy first (if you add it), then CDN.
-                var triedLocal=false;
-                function tryCdn(){
-                    loadScript('https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js', function(){
-                        if (window.LightweightCharts) { loadApp(); }
-                        else { console.error('LightweightCharts failed to load from CDN.'); }
-                    });
-                }
-                loadScript('assets/vendor/lightweight-charts.standalone.production.js', function(ok){
-                    if (window.LightweightCharts) { loadApp(); }
-                    else { tryCdn(); }
-                });
-            })();
-        </script>
+        <!-- Lightweight Charts library (CDN). If you want to avoid CDN, place a copy under assets/vendor and swap this to a local path. -->
+        <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+        <!-- App module initializes charts and UI -->
+        <script type="module" src="assets/js/app.js"></script>
         <script>
             // Register service worker
             if ('serviceWorker' in navigator) {

@@ -19,7 +19,10 @@ require 'helpers/currency_helpers.php';
     <link rel="icon" sizes="192x192" href="assets/icons/icon-192.png">
     <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
     <link rel="stylesheet" href="assets/css/style.css">
-    
+     <script src="assets/vendor/lightweight-charts.standalone.production.js"></script>
+     <script type="module" src="assets/js/app.js"></script>
+      <script src="controllers/updateController.js?v=<?php echo time(); ?>"></script>
+    <script src="assets/js/mobile-nav.js"></script>
 </head>
 <body>
     <div class="container">
@@ -34,9 +37,9 @@ require 'helpers/currency_helpers.php';
                 <!-- Chart Section -->
                 <div class="chart-section" id="chart">
                     <div class="chart-container">
-                       <!--  <div id="chart-fallback" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#666;font-size:14px;padding:12px;text-align:center;">
-                            If the chart doesn’t appear: ensure this site is served over HTTP (not file://) and the PHP helper endpoints under /helpers are reachable from your browser.
-                        </div> -->
+                        <div id="chart-fallback" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#666;font-size:14px;padding:12px;text-align:center;">
+                            Loading charts...
+                        </div>
                     </div>
                 </div>
 
@@ -177,6 +180,7 @@ require 'helpers/currency_helpers.php';
                     </table>
                 </div>
             </div>
+        </div>
     </div>
 
     <!-- Mobile Navigation -->
@@ -295,10 +299,10 @@ require 'helpers/currency_helpers.php';
             </div>
         </div>
     </div>
-        <!-- Lightweight Charts library (CDN). If you want to avoid CDN, place a copy under assets/vendor and swap this to a local path. -->
-        <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+        <!-- Lightweight Charts library (local copy) -->
+       
         <!-- App module initializes charts and UI -->
-        <script type="module" src="assets/js/app.js"></script>
+        
         <script>
             // Register service worker
             if ('serviceWorker' in navigator) {
@@ -416,7 +420,6 @@ require 'helpers/currency_helpers.php';
         }
     </script>
     <!-- app.js is injected dynamically above after the chart library loads -->
-    <script src="controllers/updateController.js?v=<?php echo time(); ?>"></script>
-    <script src="assets/js/mobile-nav.js"></script>
+   
 </body>
 </html>

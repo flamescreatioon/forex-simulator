@@ -91,17 +91,10 @@ export async function initChart(containerSelectorOrElement) {
     
     console.log('Chart created successfully');
 
-    // Build absolute URL to avoid any module-relative resolution quirks
-    // Auto-detect base path from current location to work on any server/directory
-    const getBasePath = () => {
-        const path = window.location.pathname;
-        // Extract directory path (e.g., /new_forex/ or /forex/ or /)
-        const match = path.match(/^(\/[^\/]*\/)/);
-        return match ? match[1].replace(/\/$/, '') : '';
-    };
-    
+    // Build absolute URLs relative to the current page directory.
+    // This works no matter how deeply nested the app is (e.g., /, /new_forex/, /apps/forex/web/).
     const origin = window.location.origin;
-    const basePath = getBasePath();
+    const baseDir = window.location.pathname.replace(/\/[^\/]*$/, '/'); // ensure trailing slash
     
     const getConfiguredPairs = () => {
         const m = document.cookie.match(/(?:^|; )pairs=([^;]+)/);
@@ -117,7 +110,7 @@ export async function initChart(containerSelectorOrElement) {
     const pairs = getConfiguredPairs();
 
     const fetchCandles = async (pair) => {
-        const url = `${origin}${basePath}/helpers/candles.php?pair=${encodeURIComponent(pair)}`;
+        const url = `${origin}${baseDir}helpers/candles.php?pair=${encodeURIComponent(pair)}`;
         const res = await fetch(url);
         if (!res.ok) throw new Error(`Failed to fetch chart data: ${res.status}`);
         return res.json();
@@ -257,10 +250,8 @@ function startContinuousUpdates(candlestickSeries, pair) {
     const updateCandle = async () => {
         try {
             const origin = window.location.origin;
-            const path = window.location.pathname;
-            const match = path.match(/^(\/[^\/]*\/)/);
-            const basePath = match ? match[1].replace(/\/$/, '') : '';
-            const nextCandleUrl = `${origin}${basePath}/helpers/next_candle.php?pair=${encodeURIComponent(pair)}`;
+            const baseDir = window.location.pathname.replace(/\/[^\/]*$/, '/');
+            const nextCandleUrl = `${origin}${baseDir}helpers/next_candle.php?pair=${encodeURIComponent(pair)}`;
             const response = await fetch(nextCandleUrl, { cache: 'no-store' });
             
             if (!response.ok) {

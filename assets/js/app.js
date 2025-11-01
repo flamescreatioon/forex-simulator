@@ -1,5 +1,6 @@
 // Use relative path from assets/js/ to controllers/ to work on any server
-import { initChart } from '../../controllers/chartControllers.js?v=1';
+// Avoid query params to prevent module import edge-cases on some servers
+import { initChart } from '../../controllers/chartControllers.js';
 
 console.log('app.js module loaded');
 console.log('initChart imported:', typeof initChart);

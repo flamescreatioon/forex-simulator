@@ -105,6 +105,35 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
             $_SESSION['trades'] = [];
         }
 
+        // Save settings to database if available
+        if (isset($db) && $db !== null) {
+            try {
+                // Save account session stats to database
+                $db->updateSessionStats($balance, $equity, $margin, $freemargin, $marginlevel);
+                
+                // Save all settings to database
+                $db->saveSettings([
+                    'pairs' => $pairs,
+                    'default_lot_size' => $default_lot_size,
+                    'risk_percentage' => $risk_percentage,
+                    'stop_loss_pips' => $stop_loss_pips,
+                    'take_profit_pips' => $take_profit_pips,
+                    'trailing_stop' => $trailing_stop,
+                    'positions_count' => $positions_count,
+                    'profit_bias' => $profit_bias,
+                    'profit_scale' => $profit_scale,
+                    'price_volatility' => $price_volatility,
+                    'sim_speed' => $sim_speed,
+                    'chart_timeframe' => $chart_timeframe,
+                    'chart_tf_seconds' => $chart_tf_seconds,
+                    'auto_trade' => $auto_trade
+                ]);
+            } catch (Exception $e) {
+                // Database save failed, continue with session-only mode
+                // Settings are already in $_SESSION so app will work
+            }
+        }
+
         // Store settings in cookie for JavaScript access
     setcookie('sim_speed', $sim_speed, time() + (86400 * 30), "/");
     setcookie('chart_timeframe', $chart_timeframe, time() + (86400 * 30), "/");
@@ -138,6 +167,26 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
                 <?= htmlspecialchars($error) ?>
             </div>
         <?php endif; ?>
+
+        <!-- PWA Install Button -->
+        <div id="installContainer" class="hidden mb-6">
+            <div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 rounded-lg shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <p class="font-semibold text-sm mb-1">📱 Install Forex App</p>
+                        <p class="text-xs opacity-90">Add to your home screen for quick access</p>
+                    </div>
+                    <div class="flex gap-2 ml-4">
+                        <button id="installBtn" class="bg-white text-blue-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-100 transition-colors">
+                            Install
+                        </button>
+                        <button id="dismissInstall" class="text-white px-3 py-2 rounded-lg text-sm hover:bg-white/20 transition-colors">
+                            ✕
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <form method="POST" action="">
             <!-- Account Information Section -->
@@ -354,5 +403,56 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
     </div>
 
     <script src="assets/js/mobile-nav.js"></script>
+    
+    <script>
+        // PWA Installation Handler
+        let deferredPrompt;
+        const installContainer = document.getElementById('installContainer');
+        const installBtn = document.getElementById('installBtn');
+        const dismissBtn = document.getElementById('dismissInstall');
+
+        // Detect PWA install prompt availability
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Check if user previously dismissed
+            if (localStorage.getItem('pwa-install-dismissed') !== 'true') {
+                installContainer.classList.remove('hidden');
+            }
+        });
+
+        // Handle install button click
+        installBtn.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            
+            if (outcome === 'accepted') {
+                console.log('PWA installed');
+            }
+            
+            deferredPrompt = null;
+            installContainer.classList.add('hidden');
+        });
+
+        // Handle dismiss button
+        dismissBtn.addEventListener('click', () => {
+            localStorage.setItem('pwa-install-dismissed', 'true');
+            installContainer.classList.add('hidden');
+        });
+
+        // Hide install button if already installed
+        window.addEventListener('appinstalled', () => {
+            installContainer.classList.add('hidden');
+            deferredPrompt = null;
+        });
+
+        // Check if running as installed PWA
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            installContainer.classList.add('hidden');
+        }
+    </script>
 </body>
 </html>

@@ -22,14 +22,15 @@ $manifest = [
     'theme_color' => '#3498db',
     'orientation' => 'portrait-primary',
     'icons' => [
+        // Use explicit PHP generators to avoid relying on .htaccess rewrites
         [
-            'src' => $basePath . '/assets/icons/icon-192.png',
+            'src' => $basePath . '/assets/icons/icon-192.png.php',
             'sizes' => '192x192',
             'type' => 'image/png',
             'purpose' => 'any maskable'
         ],
         [
-            'src' => $basePath . '/assets/icons/icon-512.png',
+            'src' => $basePath . '/assets/icons/icon-512.png.php',
             'sizes' => '512x512',
             'type' => 'image/png',
             'purpose' => 'any maskable'

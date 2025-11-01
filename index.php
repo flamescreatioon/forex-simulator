@@ -16,8 +16,9 @@ require 'helpers/currency_helpers.php';
     <meta name="theme-color" content="#3498db">
     <title>Volatility 1040</title>
     <link rel="manifest" href="generate_manifest.php">
-    <link rel="icon" sizes="192x192" href="assets/icons/icon-192.png">
-    <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+    <!-- Use PHP icon generators to avoid mod_rewrite dependency -->
+    <link rel="icon" sizes="192x192" href="assets/icons/icon-192.png.php">
+    <link rel="apple-touch-icon" href="assets/icons/icon-192.png.php">
     <link rel="stylesheet" href="assets/css/style.css">
      <script src="assets/vendor/lightweight-charts.standalone.production.js"></script>
      <script type="module" src="assets/js/app.js"></script>
@@ -352,12 +353,30 @@ require 'helpers/currency_helpers.php';
                 document.head.appendChild(style);
             }
 
+            function showInstallFab() {
+                // Compact floating button for small screens
+                if (document.getElementById('pwa-install-fab')) return;
+                const dismissed = localStorage.getItem('pwa-install-dismissed');
+                // Skip if recently dismissed
+                if (dismissed && (Date.now() - parseInt(dismissed)) < 7 * 24 * 60 * 60 * 1000) return;
+
+                const fab = document.createElement('button');
+                fab.id = 'pwa-install-fab';
+                fab.setAttribute('aria-label', 'Install app');
+                fab.style.cssText = 'position:fixed;right:16px;bottom:86px;width:52px;height:52px;border-radius:50%;background:#3498db;color:#fff;border:none;box-shadow:0 6px 16px rgba(0,0,0,0.25);z-index:10000;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;';
+                fab.textContent = '⬇';
+                fab.addEventListener('click', () => triggerInstall());
+                document.body.appendChild(fab);
+            }
+
             window.dismissInstallPromotion = function() {
                 const banner = document.getElementById('pwa-install-banner');
                 if (banner) {
                     banner.style.animation = 'slideDown 0.3s ease-out';
                     setTimeout(() => banner.remove(), 300);
                 }
+                const fab = document.getElementById('pwa-install-fab');
+                if (fab) fab.remove();
                 localStorage.setItem('pwa-install-dismissed', Date.now());
             };
 
@@ -370,7 +389,11 @@ require 'helpers/currency_helpers.php';
                     return;
                 }
 
-                if (!deferredPrompt) return;
+                if (!deferredPrompt) {
+                    // Helpful fallback for Android when the prompt event wasn't captured yet
+                    alert('If you don\'t see the install prompt, open the browser menu and choose "Install app" or "Add to Home screen".');
+                    return;
+                }
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
                 console.log('[PWA] Install prompt result:', outcome);
@@ -397,9 +420,16 @@ require 'helpers/currency_helpers.php';
                 const iOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
                 const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
                 if (!deferredPrompt && iOS && !isStandalone) {
+                    // On iOS there is no beforeinstallprompt; show both FAB and banner for visibility
+                    showInstallFab();
                     showInstallPromotion();
                 }
             }, 1500);
+
+            // Also show a small FAB on Android if the event fires later or was missed
+            window.addEventListener('beforeinstallprompt', () => {
+                showInstallFab();
+            });
         </script>
     <script>
         // Transfer settings from cookies to sessionStorage for JavaScript access

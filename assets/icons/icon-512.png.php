@@ -1,0 +1,1 @@
+<?php $_GET['size'] = 512; require 'generate_icon.php';

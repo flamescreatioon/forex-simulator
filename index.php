@@ -15,7 +15,7 @@ require 'helpers/currency_helpers.php';
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#3498db">
     <title>Forex Trading Platform</title>
-    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="manifest" href="generate_manifest.php">
     <link rel="icon" sizes="192x192" href="assets/icons/icon-192.png">
     <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
     <link rel="stylesheet" href="assets/css/style.css">
@@ -304,31 +304,83 @@ require 'helpers/currency_helpers.php';
         <!-- App module initializes charts and UI -->
         
         <script>
-            // Register service worker
+            // Register service worker with better error handling
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
-                    // Auto-detect base path from current location
                     const path = window.location.pathname;
                     const basePath = path.substring(0, path.lastIndexOf('/'));
-                    navigator.serviceWorker.register(basePath + '/service-worker.js').catch(console.error);
+                    // Use the new dynamic service worker
+                    navigator.serviceWorker.register(basePath + '/sw.js')
+                        .then(reg => {
+                            console.log('[PWA] Service worker registered:', reg.scope);
+                            // Check for updates periodically
+                            setInterval(() => reg.update(), 60000); // Check every minute
+                        })
+                        .catch(err => console.error('[PWA] Service worker registration failed:', err));
                 });
             }
 
-            // Handle PWA install prompt (optional UI hook)
+            // Handle PWA install prompt with UI
             let deferredPrompt;
+            let installButton;
+            
             window.addEventListener('beforeinstallprompt', (e) => {
                 e.preventDefault();
                 deferredPrompt = e;
-                // You can show a custom install button and call prompt() on click
-                // Example: document.getElementById('installBtn').style.display = 'block';
+                // Show install button if not already installed
+                showInstallPromotion();
             });
 
-            async function triggerInstall() {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    deferredPrompt = null;
+            function showInstallPromotion() {
+                // Create install banner if it doesn't exist
+                if (document.getElementById('pwa-install-banner')) return;
+                
+                const banner = document.createElement('div');
+                banner.id = 'pwa-install-banner';
+                banner.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#3498db;color:white;padding:12px 20px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:9999;display:flex;gap:12px;align-items:center;max-width:90%;animation:slideUp 0.3s ease-out;';
+                banner.innerHTML = `
+                    <span style="flex:1;font-size:14px;font-weight:500;">📱 Install Forex Trading App</span>
+                    <button onclick="triggerInstall()" style="background:white;color:#3498db;border:none;padding:8px 16px;border-radius:6px;font-weight:600;cursor:pointer;font-size:13px;">Install</button>
+                    <button onclick="dismissInstallPromotion()" style="background:transparent;color:white;border:1px solid white;padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;">Later</button>
+                `;
+                document.body.appendChild(banner);
+                
+                // Add animation
+                const style = document.createElement('style');
+                style.textContent = '@keyframes slideUp { from { bottom:-100px; opacity:0; } to { bottom:80px; opacity:1; } }';
+                document.head.appendChild(style);
+            }
+
+            window.dismissInstallPromotion = function() {
+                const banner = document.getElementById('pwa-install-banner');
+                if (banner) {
+                    banner.style.animation = 'slideDown 0.3s ease-out';
+                    setTimeout(() => banner.remove(), 300);
                 }
+                localStorage.setItem('pwa-install-dismissed', Date.now());
+            };
+
+            async function triggerInstall() {
+                if (!deferredPrompt) return;
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log('[PWA] Install prompt result:', outcome);
+                if (outcome === 'accepted') {
+                    dismissInstallPromotion();
+                }
+                deferredPrompt = null;
+            }
+
+            // Check if already installed
+            window.addEventListener('appinstalled', () => {
+                console.log('[PWA] App installed successfully');
+                dismissInstallPromotion();
+            });
+
+            // Don't show banner if dismissed recently (within 7 days)
+            const dismissed = localStorage.getItem('pwa-install-dismissed');
+            if (dismissed && (Date.now() - parseInt(dismissed)) < 7 * 24 * 60 * 60 * 1000) {
+                deferredPrompt = null;
             }
         </script>
     <script>

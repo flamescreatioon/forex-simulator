@@ -1,0 +1,6 @@
+# Rewrite PNG icon requests to PHP generator
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^icon-192\.png$ generate_icon.php?size=192 [L]
+    RewriteRule ^icon-512\.png$ generate_icon.php?size=512 [L]
+</IfModule>

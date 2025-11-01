@@ -92,8 +92,17 @@ export async function initChart(containerSelectorOrElement) {
     console.log('Chart created successfully');
 
     // Build absolute URL to avoid any module-relative resolution quirks
+    // Auto-detect base path from current location to work on any server/directory
+    const getBasePath = () => {
+        const path = window.location.pathname;
+        // Extract directory path (e.g., /new_forex/ or /forex/ or /)
+        const match = path.match(/^(\/[^\/]*\/)/);
+        return match ? match[1].replace(/\/$/, '') : '';
+    };
+    
     const origin = window.location.origin;
-    const basePath = '/new_forex';
+    const basePath = getBasePath();
+    
     const getConfiguredPairs = () => {
         const m = document.cookie.match(/(?:^|; )pairs=([^;]+)/);
         if (!m) return [];
@@ -248,7 +257,9 @@ function startContinuousUpdates(candlestickSeries, pair) {
     const updateCandle = async () => {
         try {
             const origin = window.location.origin;
-            const basePath = '/new_forex';
+            const path = window.location.pathname;
+            const match = path.match(/^(\/[^\/]*\/)/);
+            const basePath = match ? match[1].replace(/\/$/, '') : '';
             const nextCandleUrl = `${origin}${basePath}/helpers/next_candle.php?pair=${encodeURIComponent(pair)}`;
             const response = await fetch(nextCandleUrl, { cache: 'no-store' });
             

@@ -353,5 +353,6 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
         </a>
     </div>
 
+    <script src="assets/js/mobile-nav.js"></script>
 </body>
 </html>

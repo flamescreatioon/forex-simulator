@@ -283,5 +283,6 @@ require_once 'includes/session.php';
       intervalId = setInterval(fetchPositions, getSimInterval());
     });
   </script>
+  <script src="assets/js/mobile-nav.js"></script>
 </body>
 </html>

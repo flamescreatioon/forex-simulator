@@ -133,5 +133,6 @@ if (!$id) {
       intervalId = setInterval(fetchPosition, getSimInterval());
     });
   </script>
+  <script src="assets/js/mobile-nav.js"></script>
 </body>
 </html>

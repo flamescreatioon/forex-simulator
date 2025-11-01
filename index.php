@@ -300,7 +300,10 @@ require 'helpers/currency_helpers.php';
             // Register service worker
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('/new_forex/service-worker.js').catch(console.error);
+                    // Auto-detect base path from current location
+                    const path = window.location.pathname;
+                    const basePath = path.substring(0, path.lastIndexOf('/'));
+                    navigator.serviceWorker.register(basePath + '/service-worker.js').catch(console.error);
                 });
             }
 
@@ -412,5 +415,6 @@ require 'helpers/currency_helpers.php';
     <!-- Load the application as a module. app.js imports the chart controller. -->
     <script type="module" src="assets/js/app.js"></script>
     <script src="controllers/updateController.js?v=<?php echo time(); ?>"></script>
+    <script src="assets/js/mobile-nav.js"></script>
 </body>
 </html>

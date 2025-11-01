@@ -92,5 +92,6 @@ $trades = $_SESSION['trades'];
       }
     });
   </script>
+  <script src="assets/js/mobile-nav.js"></script>
 </body>
 </html>

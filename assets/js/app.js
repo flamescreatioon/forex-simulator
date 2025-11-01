@@ -1,5 +1,5 @@
-// Use absolute path to avoid relative resolution issues in some servers
-import { initChart } from '/new_forex/controllers/chartControllers.js?v=1';
+// Use relative path from assets/js/ to controllers/ to work on any server
+import { initChart } from '../../controllers/chartControllers.js?v=1';
 
 console.log('app.js module loaded');
 console.log('initChart imported:', typeof initChart);
@@ -175,39 +175,6 @@ document.addEventListener('DOMContentLoaded', () => {
             symbolList.classList.toggle('show');
         });
     }
-
-    // Mobile navigation active state based on hash or current page
-    const updateMobileNavActive = () => {
-        const mobileNavItems = document.querySelectorAll('.mobile-nav-item');
-        const currentHash = window.location.hash;
-        const currentPath = window.location.pathname;
-        const currentPage = currentPath.split('/').pop() || 'index.php';
-        
-        mobileNavItems.forEach(item => {
-            item.classList.remove('active');
-            const href = item.getAttribute('href');
-            
-            // Check if it's a hash link and matches current hash
-            if (href && href.startsWith('#') && href === currentHash) {
-                item.classList.add('active');
-            }
-            // Check if the href contains the current page name
-            else if (href && !href.startsWith('#')) {
-                const linkPage = href.split('/').pop().split('?')[0];
-                if (linkPage && currentPage.includes(linkPage)) {
-                    item.classList.add('active');
-                }
-            }
-            // Default to quotes on index page with no hash
-            else if (currentPage.includes('index.php') && !currentHash && href === '#quotes') {
-                item.classList.add('active');
-            }
-        });
-    };
-
-    // Update active state on hash change
-    window.addEventListener('hashchange', updateMobileNavActive);
-    updateMobileNavActive();
 
     // Initialize chart after DOM is ready. Errors are logged to console.
     console.log('About to initialize chart...');

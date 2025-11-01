@@ -295,7 +295,34 @@ require 'helpers/currency_helpers.php';
             </div>
         </div>
     </div>
-        <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+        <script>
+            // Ensure LightweightCharts is available before loading the app module.
+            (function loadChartsAndApp(){
+                function loadScript(src, cb){
+                    var s=document.createElement('script');
+                    s.src=src; s.async=true; s.onload=function(){cb(true)}; s.onerror=function(){cb(false)}; document.head.appendChild(s);
+                }
+                function loadApp(){
+                    // Inject module script dynamically so it runs after the chart lib is present
+                    var m=document.createElement('script');
+                    m.type='module';
+                    m.src='assets/js/app.js';
+                    document.body.appendChild(m);
+                }
+                // Try local vendor copy first (if you add it), then CDN.
+                var triedLocal=false;
+                function tryCdn(){
+                    loadScript('https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js', function(){
+                        if (window.LightweightCharts) { loadApp(); }
+                        else { console.error('LightweightCharts failed to load from CDN.'); }
+                    });
+                }
+                loadScript('assets/vendor/lightweight-charts.standalone.production.js', function(ok){
+                    if (window.LightweightCharts) { loadApp(); }
+                    else { tryCdn(); }
+                });
+            })();
+        </script>
         <script>
             // Register service worker
             if ('serviceWorker' in navigator) {
@@ -412,8 +439,7 @@ require 'helpers/currency_helpers.php';
             });
         }
     </script>
-    <!-- Load the application as a module. app.js imports the chart controller. -->
-    <script type="module" src="assets/js/app.js"></script>
+    <!-- app.js is injected dynamically above after the chart library loads -->
     <script src="controllers/updateController.js?v=<?php echo time(); ?>"></script>
     <script src="assets/js/mobile-nav.js"></script>
 </body>

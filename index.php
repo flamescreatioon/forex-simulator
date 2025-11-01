@@ -309,8 +309,9 @@ require 'helpers/currency_helpers.php';
                 window.addEventListener('load', () => {
                     const path = window.location.pathname;
                     const basePath = path.substring(0, path.lastIndexOf('/'));
-                    // Use the new dynamic service worker
-                    navigator.serviceWorker.register(basePath + '/sw.js')
+                    // Force fresh fetch of sw.js on deploys and avoid HTTP cache
+                    const swUrl = basePath + '/sw.js?v=<?php echo time(); ?>';
+                    navigator.serviceWorker.register(swUrl, { updateViaCache: 'none' })
                         .then(reg => {
                             console.log('[PWA] Service worker registered:', reg.scope);
                             // Check for updates periodically

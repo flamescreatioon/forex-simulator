@@ -1,5 +1,5 @@
 // Service Worker with dynamic path detection
-const VERSION = 'forex-pwa-v2';
+const VERSION = 'forex-pwa-v3';
 const CACHE_NAME = `${VERSION}-${self.location.pathname.split('/').filter(Boolean)[0] || 'root'}`;
 
 // Detect base path from service worker location

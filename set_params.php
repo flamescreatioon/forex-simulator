@@ -402,6 +402,21 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
         </a>
     </div>
 
+    <script>
+        // Register service worker here as well so updates apply even if users land on Settings first
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const path = window.location.pathname;
+                const basePath = path.substring(0, path.lastIndexOf('/'));
+                const swUrl = basePath + '/sw.js?v=<?php echo time(); ?>';
+                navigator.serviceWorker.register(swUrl, { updateViaCache: 'none' })
+                    .then(reg => {
+                        console.log('[PWA] Service worker registered (settings):', reg.scope);
+                    })
+                    .catch(err => console.error('[PWA] SW registration failed (settings):', err));
+            });
+        }
+    </script>
     <script src="assets/js/mobile-nav.js"></script>
     
     <script>

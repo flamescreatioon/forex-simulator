@@ -34,9 +34,9 @@ require 'helpers/currency_helpers.php';
                 <!-- Chart Section -->
                 <div class="chart-section" id="chart">
                     <div class="chart-container">
-                        <div id="chart-fallback" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#666;font-size:14px;padding:12px;text-align:center;">
+                       <!--  <div id="chart-fallback" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#666;font-size:14px;padding:12px;text-align:center;">
                             If the chart doesn’t appear: ensure this site is served over HTTP (not file://) and the PHP helper endpoints under /helpers are reachable from your browser.
-                        </div>
+                        </div> -->
                     </div>
                 </div>
 

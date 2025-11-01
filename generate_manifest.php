@@ -12,9 +12,9 @@ if ($basePath === '/' || $basePath === '\\') {
 }
 
 $manifest = [
-    'name' => 'Forex Trading Platform',
-    'short_name' => 'Forex',
-    'description' => 'Lightweight forex trading platform with live charts and positions.',
+    'name' => 'Volatility 1040',
+    'short_name' => 'Volatility 1040',
+    'description' => 'Volatility 1040 — lightweight trading dashboard with live charts and positions.',
     'start_url' => $basePath . '/index.php',
     'scope' => $basePath . '/',
     'display' => 'standalone',

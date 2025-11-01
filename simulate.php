@@ -22,8 +22,10 @@ $base_increment = 50;
 $max_increment = 500;
 $increment_range = ($max_increment - $base_increment) * $price_volatility;
 
-// If balance is below the goal, simulate a profit increment and update balance & profit
-if ($balance < $goal) {
+// Only simulate account growth when demo bot (auto_trade) is enabled
+$auto_trade = $_SESSION["auto_trade"] ?? 0;
+// If balance is below the goal and auto trade is enabled, simulate a profit increment
+if ($auto_trade && $balance < $goal) {
     $increment = rand($base_increment, $base_increment + $increment_range);
     $profit = $profit + $increment;
     $balance = $balance + $increment;

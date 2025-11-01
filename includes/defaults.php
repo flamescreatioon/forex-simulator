@@ -35,7 +35,7 @@ if (!isset($_SESSION['freemargin'])) {
 }
 
 if (!isset($_SESSION['marginlevel'])) {
-    $_SESSION['marginlevel'] = '0.00%';
+    $_SESSION['marginlevel'] = 0.00;
 }
 
 if (!isset($_SESSION['leverage'])) {

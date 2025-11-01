@@ -14,7 +14,7 @@ require 'helpers/currency_helpers.php';
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#3498db">
-    <title>Forex Trading Platform</title>
+    <title>Volatility 1040</title>
     <link rel="manifest" href="generate_manifest.php">
     <link rel="icon" sizes="192x192" href="assets/icons/icon-192.png">
     <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
@@ -340,7 +340,7 @@ require 'helpers/currency_helpers.php';
                 banner.id = 'pwa-install-banner';
                 banner.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#3498db;color:white;padding:12px 20px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:9999;display:flex;gap:12px;align-items:center;max-width:90%;animation:slideUp 0.3s ease-out;';
                 banner.innerHTML = `
-                    <span style="flex:1;font-size:14px;font-weight:500;">📱 Install Forex Trading App</span>
+                    <span style="flex:1;font-size:14px;font-weight:500;">📱 Install Volatility 1040</span>
                     <button onclick="triggerInstall()" style="background:white;color:#3498db;border:none;padding:8px 16px;border-radius:6px;font-weight:600;cursor:pointer;font-size:13px;">Install</button>
                     <button onclick="dismissInstallPromotion()" style="background:transparent;color:white;border:1px solid white;padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;">Later</button>
                 `;
@@ -362,6 +362,14 @@ require 'helpers/currency_helpers.php';
             };
 
             async function triggerInstall() {
+                // iOS/Safari fallback: show instructions instead of prompt
+                const iOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+                const safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+                if (iOS || safari) {
+                    alert('To install on iPhone/iPad: Tap the Share icon, then choose "Add to Home Screen".');
+                    return;
+                }
+
                 if (!deferredPrompt) return;
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
@@ -383,6 +391,15 @@ require 'helpers/currency_helpers.php';
             if (dismissed && (Date.now() - parseInt(dismissed)) < 7 * 24 * 60 * 60 * 1000) {
                 deferredPrompt = null;
             }
+
+            // Fallback: show banner with instructions on iOS even if beforeinstallprompt doesn't fire
+            setTimeout(() => {
+                const iOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+                const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+                if (!deferredPrompt && iOS && !isStandalone) {
+                    showInstallPromotion();
+                }
+            }, 1500);
         </script>
     <script>
         // Transfer settings from cookies to sessionStorage for JavaScript access
@@ -392,13 +409,14 @@ require 'helpers/currency_helpers.php';
             if (parts.length === 2) return parts.pop().split(';').shift();
             return null;
         }
-        
-        const simSpeed = getCookie('sim_speed');
-        const priceVolatility = getCookie('price_volatility');
-        
-        if (simSpeed) sessionStorage.setItem('sim_speed', simSpeed);
-        if (priceVolatility) sessionStorage.setItem('price_volatility', priceVolatility);
 
+        // Wrap in IIFE to avoid leaking identifiers to the global scope (prevents "already declared" errors)
+        (function syncSettingsFromCookies() {
+            const _simSpeed = getCookie('sim_speed');
+            const _priceVolatility = getCookie('price_volatility');
+            if (_simSpeed) sessionStorage.setItem('sim_speed', _simSpeed);
+            if (_priceVolatility) sessionStorage.setItem('price_volatility', _priceVolatility);
+        })();
 
 
         // Pairs modal handlers

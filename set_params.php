@@ -153,7 +153,11 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Settings</title>
+    <meta name="theme-color" content="#3498db">
+    <link rel="manifest" href="generate_manifest.php">
+    <link rel="icon" sizes="192x192" href="assets/icons/icon-192.png">
+    <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+    <title>Volatility 1040 — Settings</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -168,13 +172,14 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
             </div>
         <?php endif; ?>
 
-        <!-- PWA Install Button -->
+        <!-- PWA Install Button / Instructions -->
         <div id="installContainer" class="hidden mb-6">
             <div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 rounded-lg shadow-lg">
                 <div class="flex items-center justify-between">
                     <div class="flex-1">
-                        <p class="font-semibold text-sm mb-1">📱 Install Forex App</p>
+                        <p class="font-semibold text-sm mb-1">📱 Install Volatility 1040</p>
                         <p class="text-xs opacity-90">Add to your home screen for quick access</p>
+                        <p id="installHint" class="text-xs opacity-80 mt-1 hidden">On iPhone/iPad: Share ▶ Add to Home Screen</p>
                     </div>
                     <div class="flex gap-2 ml-4">
                         <button id="installBtn" class="bg-white text-blue-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-100 transition-colors">
@@ -425,6 +430,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
         const installContainer = document.getElementById('installContainer');
         const installBtn = document.getElementById('installBtn');
         const dismissBtn = document.getElementById('dismissInstall');
+        const installHint = document.getElementById('installHint');
 
         // Detect PWA install prompt availability
         window.addEventListener('beforeinstallprompt', (e) => {
@@ -438,25 +444,38 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
         });
 
         // Handle install button click
-        installBtn.addEventListener('click', async () => {
-            if (!deferredPrompt) return;
-            
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            
-            if (outcome === 'accepted') {
-                console.log('PWA installed');
-            }
-            
-            deferredPrompt = null;
-            installContainer.classList.add('hidden');
-        });
+        if (installBtn) {
+            installBtn.addEventListener('click', async () => {
+                // iOS/Safari doesn't support beforeinstallprompt
+                const iOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+                const safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+                if (iOS || safari) {
+                    // Show hint text
+                    if (installHint) installHint.classList.remove('hidden');
+                    return;
+                }
+
+                if (!deferredPrompt) return;
+                
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                
+                if (outcome === 'accepted') {
+                    console.log('PWA installed');
+                }
+                
+                deferredPrompt = null;
+                installContainer.classList.add('hidden');
+            });
+        }
 
         // Handle dismiss button
-        dismissBtn.addEventListener('click', () => {
-            localStorage.setItem('pwa-install-dismissed', 'true');
-            installContainer.classList.add('hidden');
-        });
+        if (dismissBtn) {
+            dismissBtn.addEventListener('click', () => {
+                localStorage.setItem('pwa-install-dismissed', 'true');
+                installContainer.classList.add('hidden');
+            });
+        }
 
         // Hide install button if already installed
         window.addEventListener('appinstalled', () => {
@@ -468,6 +487,17 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
         if (window.matchMedia('(display-mode: standalone)').matches) {
             installContainer.classList.add('hidden');
         }
+
+        // Fallback: if beforeinstallprompt didn't fire after a short delay, show instructions for iOS
+        setTimeout(() => {
+            if (!deferredPrompt) {
+                const iOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+                if (iOS && localStorage.getItem('pwa-install-dismissed') !== 'true') {
+                    installContainer.classList.remove('hidden');
+                    if (installHint) installHint.classList.remove('hidden');
+                }
+            }
+        }, 1500);
     </script>
 </body>
 </html>

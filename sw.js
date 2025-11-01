@@ -86,7 +86,7 @@ self.addEventListener('fetch', (event) => {
         event.respondWith(cacheFirstStrategy(request));
     } else {
         // Stale-while-revalidate for pages
-        event.respondWith(staleWhileRevalidateStrategy(request));
+        event.respondWith(staleWhileRevalidateStrategy(event));
     }
 });
 
@@ -131,21 +131,35 @@ async function cacheFirstStrategy(request) {
 }
 
 // Stale-while-revalidate strategy (for pages)
-async function staleWhileRevalidateStrategy(request) {
+async function staleWhileRevalidateStrategy(event) {
+    const request = event.request;
     const cachedResponse = await caches.match(request);
-    
-    const fetchPromise = fetch(request).then(networkResponse => {
-        if (networkResponse && networkResponse.status === 200) {
-            const cache = caches.open(CACHE_NAME);
-            cache.then(c => c.put(request, networkResponse.clone()));
+
+    // Start a network request in parallel and update the cache in the background
+    const networkPromise = (async () => {
+        try {
+            const networkResponse = await fetch(request);
+            if (networkResponse && networkResponse.status === 200) {
+                const cache = await caches.open(CACHE_NAME);
+                // Clone defensively; if the body is already used for some reason, skip caching
+                try {
+                    const clone = networkResponse.clone();
+                    // Keep SW alive until caching completes
+                    event.waitUntil(cache.put(request, clone));
+                } catch (err) {
+                    console.warn('[SW] Could not clone response for caching:', request.url, err);
+                }
+            }
+            return networkResponse;
+        } catch (err) {
+            // If offline and no cache, serve offline page
+            const offline = await caches.match(`${BASE_PATH}/offline.html`);
+            return offline || new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
         }
-        return networkResponse;
-    }).catch(() => {
-        // If offline and no cache, show offline page
-        return caches.match(`${BASE_PATH}/offline.html`);
-    });
-    
-    return cachedResponse || fetchPromise;
+    })();
+
+    // Return cached response immediately if present, else wait for network
+    return cachedResponse || networkPromise;
 }
 
 // Listen for messages from clients

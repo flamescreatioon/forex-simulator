@@ -52,8 +52,8 @@ try {
                 if (!isset($_SESSION['balance'])) $_SESSION['balance'] = $session_data['balance'];
                 if (!isset($_SESSION['equity'])) $_SESSION['equity'] = $session_data['equity'];
                 if (!isset($_SESSION['margin'])) $_SESSION['margin'] = $session_data['margin'];
-                if (!isset($_SESSION['freemargin'])) $_SESSION['free_margin'] = $session_data['free_margin'];
-                if (!isset($_SESSION['marginlevel'])) $_SESSION['margin_level'] = $session_data['margin_level'];
+                if (!isset($_SESSION['freemargin'])) $_SESSION['freemargin'] = $session_data['free_margin'];
+                if (!isset($_SESSION['marginlevel'])) $_SESSION['marginlevel'] = $session_data['margin_level'];
             }
         }
     }

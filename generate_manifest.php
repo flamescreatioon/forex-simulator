@@ -19,7 +19,7 @@ $manifest = [
     'scope' => $basePath . '/',
     'display' => 'standalone',
     'background_color' => '#ffffff',
-    'theme_color' => '#3498db',
+    'theme_color' => '#2563eb',
     'orientation' => 'portrait-primary',
     'icons' => [
         // Use explicit PHP generators to avoid relying on .htaccess rewrites

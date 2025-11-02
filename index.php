@@ -8,23 +8,25 @@ require 'helpers/currency_helpers.php';
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#3498db">
+    <meta name="theme-color" content="#2563eb">
     <title>Volatility 1040</title>
     <link rel="manifest" href="generate_manifest.php">
     <!-- Use PHP icon generators to avoid mod_rewrite dependency -->
     <link rel="icon" sizes="192x192" href="assets/icons/icon-192.png.php">
     <link rel="apple-touch-icon" href="assets/icons/icon-192.png.php">
     <link rel="stylesheet" href="assets/css/style.css">
-     <script src="assets/vendor/lightweight-charts.standalone.production.js"></script>
-     <script type="module" src="assets/js/app.js"></script>
-      <script src="controllers/updateController.js?v=<?php echo time(); ?>"></script>
+    <script src="assets/vendor/lightweight-charts.standalone.production.js"></script>
+    <script type="module" src="assets/js/app.js"></script>
+    <script src="controllers/updateController.js?v=<?php echo time(); ?>"></script>
     <script src="assets/js/mobile-nav.js"></script>
 </head>
+
 <body>
     <div class="container">
         <!-- Sidebar -->
@@ -143,7 +145,7 @@ require 'helpers/currency_helpers.php';
                         </div>
                     <?php endif; ?>
 
-                    <table class="trades-history" >
+                    <table class="trades-history">
                         <thead>
                             <tr>
                                 <th>Pair</th>
@@ -152,9 +154,9 @@ require 'helpers/currency_helpers.php';
                             </tr>
                         </thead>
                         <tbody id="tradesTableBody">
-                           <tr>
-                            <td>No trades yet</td>
-                           </tr>
+                            <tr>
+                                <td>No trades yet</td>
+                            </tr>
                         </tbody>
                     </table>
                     <div style="margin-top:8px;">
@@ -174,9 +176,9 @@ require 'helpers/currency_helpers.php';
                             </tr>
                         </thead>
                         <tbody>
-                           <tr>
-                            <td colspan="7">No deals yet</td>
-                           </tr>
+                            <tr>
+                                <td colspan="7">No deals yet</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -191,63 +193,70 @@ require 'helpers/currency_helpers.php';
             <span>Quotes</span>
         </a>
         <a class="mobile-nav-item" href="#chart">
-            <span class="nav-icon">⌭</span>
+            <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-align-horizontal-distribute-center-icon lucide-align-horizontal-distribute-center">
+                    <rect width="6" height="14" x="4" y="5" rx="2" fill="currentColor" stroke="none" />
+                    <rect width="6" height="10" x="14" y="7" rx="2" />
+                    <path d="M17 22v-5" />
+                    <path d="M17 7V2" />
+                    <path d="M7 22v-3" />
+                    <path d="M7 5V2" />
+                </svg></span>
             <span>Chart</span>
         </a>
         <a class="mobile-nav-item" href="trade.php">
-            <span class="nav-icon">≡</span>
+            <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-line-icon lucide-chart-line"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></svg></span>
             <span>Trade</span>
-             
+
         </a>
         <a class="mobile-nav-item" href="trades_view.php">
-            <span class="nav-icon">⏱</span>
+            <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-history-icon lucide-history"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg></span>
             <span>History</span>
         </a>
-                <a class="mobile-nav-item" href="set_params.php">
-            <span class="nav-icon">⚙</span>
+        <a class="mobile-nav-item" href="set_params.php">
+            <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-icon lucide-settings"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg></span>
             <span>Settings</span>
         </a>
     </div>
 
-        <!-- Pairs Selector Modal -->
-        <?php
-            $default_pairs = ['EUR/USD','GBP/USD','USD/JPY','AUD/USD','USD/CAD','USD/CHF','NZD/USD','GBP/JPY'];
-            $configured_pairs = isset($_SESSION['pairs']) && is_array($_SESSION['pairs']) ? $_SESSION['pairs'] : $default_pairs;
-            $all_pairs = array_values(array_unique(array_merge($default_pairs, $configured_pairs)));
-        ?>
-        <div id="pairsModal" class="modal" style="display:none;">
-            <div class="modal-content" style="max-width:480px;">
-                <div class="modal-header">
-                    <div class="modal-title">Select Pairs</div>
-                    <div class="modal-close" id="closePairsModal" style="cursor:pointer;">×</div>
+    <!-- Pairs Selector Modal -->
+    <?php
+    $default_pairs = ['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD', 'USD/CAD', 'USD/CHF', 'NZD/USD', 'GBP/JPY'];
+    $configured_pairs = isset($_SESSION['pairs']) && is_array($_SESSION['pairs']) ? $_SESSION['pairs'] : $default_pairs;
+    $all_pairs = array_values(array_unique(array_merge($default_pairs, $configured_pairs)));
+    ?>
+    <div id="pairsModal" class="modal" style="display:none;">
+        <div class="modal-content" style="max-width:480px;">
+            <div class="modal-header">
+                <div class="modal-title">Select Pairs</div>
+                <div class="modal-close" id="closePairsModal" style="cursor:pointer;">×</div>
+            </div>
+            <div class="modal-body">
+                <div class="pairs-actions">
+                    <div class="actions-row">
+                        <input id="pairsSearch" type="text" class="pairs-search-input" placeholder="Search pairs e.g. EUR/USD" />
+                        <button id="selectAllPairs" type="button" class="pairs-action-btn">Select All</button>
+                        <button id="clearPairs" type="button" class="pairs-action-btn">Clear</button>
+                    </div>
                 </div>
-                <div class="modal-body">
-                    <div class="pairs-actions">
-                        <div class="actions-row">
-                            <input id="pairsSearch" type="text" class="pairs-search-input" placeholder="Search pairs e.g. EUR/USD" />
-                            <button id="selectAllPairs" type="button" class="pairs-action-btn">Select All</button>
-                            <button id="clearPairs" type="button" class="pairs-action-btn">Clear</button>
-                        </div>
+                <div id="pairsScroll" class="pairs-scroll">
+                    <div id="pairsList">
+                        <?php foreach ($all_pairs as $p): ?>
+                            <label class="pair-row">
+                                <div class="pair-left">
+                                    <input type="checkbox" class="pair-checkbox" value="<?= htmlspecialchars($p) ?>">
+                                    <span class="pair-code"><?= htmlspecialchars($p) ?></span>
+                                </div>
+                            </label>
+                        <?php endforeach; ?>
                     </div>
-                    <div id="pairsScroll" class="pairs-scroll">
-                        <div id="pairsList">
-                            <?php foreach ($all_pairs as $p): ?>
-                                <label class="pair-row">
-                                    <div class="pair-left">
-                                        <input type="checkbox" class="pair-checkbox" value="<?= htmlspecialchars($p) ?>">
-                                        <span class="pair-code"><?= htmlspecialchars($p) ?></span>
-                                    </div>
-                                </label>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-                    <div style="display:flex; gap:10px; margin-top:12px;">
-                        <button id="savePairs" class="pairs-action-btn primary" style="flex:1;">Save</button>
-                        <button id="cancelPairs" class="pairs-action-btn" style="flex:1;">Cancel</button>
-                    </div>
+                </div>
+                <div style="display:flex; gap:10px; margin-top:12px;">
+                    <button id="savePairs" class="pairs-action-btn primary" style="flex:1;">Save</button>
+                    <button id="cancelPairs" class="pairs-action-btn" style="flex:1;">Cancel</button>
                 </div>
             </div>
         </div>
+    </div>
 
     <!-- Order Modal -->
     <div class="modal" id="orderModal">
@@ -276,12 +285,12 @@ require 'helpers/currency_helpers.php';
                     <small id="tpPrice" style="color: #888;"></small>
                 </div>
                 <?php if (($_SESSION['trailing_stop'] ?? 0) == 1): ?>
-                <div class="form-group">
-                    <label class="form-label">
-                        <input type="checkbox" id="trailingStopCheck" checked> Trailing Stop Enabled
-                    </label>
-                    <small>Stop loss will follow price as it moves in your favor</small>
-                </div>
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" id="trailingStopCheck" checked> Trailing Stop Enabled
+                        </label>
+                        <small>Stop loss will follow price as it moves in your favor</small>
+                    </div>
                 <?php endif; ?>
                 <div class="form-group">
                     <label class="form-label">Comment</label>
@@ -300,137 +309,141 @@ require 'helpers/currency_helpers.php';
             </div>
         </div>
     </div>
-        <!-- Lightweight Charts library (local copy) -->
-       
-        <!-- App module initializes charts and UI -->
-        
-        <script>
-            // Register service worker with better error handling
-            if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                    const path = window.location.pathname;
-                    const basePath = path.substring(0, path.lastIndexOf('/'));
-                    // Force fresh fetch of sw.js on deploys and avoid HTTP cache
-                    const swUrl = basePath + '/sw.js?v=<?php echo time(); ?>';
-                    navigator.serviceWorker.register(swUrl, { updateViaCache: 'none' })
-                        .then(reg => {
-                            console.log('[PWA] Service worker registered:', reg.scope);
-                            // Check for updates periodically
-                            setInterval(() => reg.update(), 60000); // Check every minute
-                        })
-                        .catch(err => console.error('[PWA] Service worker registration failed:', err));
-                });
-            }
+    <!-- Lightweight Charts library (local copy) -->
 
-            // Handle PWA install prompt with UI
-            let deferredPrompt;
-            let installButton;
-            
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                // Show install button if not already installed
-                showInstallPromotion();
+    <!-- App module initializes charts and UI -->
+
+    <script>
+        // Register service worker with better error handling
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const path = window.location.pathname;
+                const basePath = path.substring(0, path.lastIndexOf('/'));
+                // Force fresh fetch of sw.js on deploys and avoid HTTP cache
+                const swUrl = basePath + '/sw.js?v=<?php echo time(); ?>';
+                navigator.serviceWorker.register(swUrl, {
+                        updateViaCache: 'none'
+                    })
+                    .then(reg => {
+                        console.log('[PWA] Service worker registered:', reg.scope);
+                        // Check for updates periodically
+                        setInterval(() => reg.update(), 60000); // Check every minute
+                    })
+                    .catch(err => console.error('[PWA] Service worker registration failed:', err));
             });
+        }
 
-            function showInstallPromotion() {
-                // Create install banner if it doesn't exist
-                if (document.getElementById('pwa-install-banner')) return;
-                
-                const banner = document.createElement('div');
+        // Handle PWA install prompt with UI
+        let deferredPrompt;
+        let installButton;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Show install button if not already installed
+            showInstallPromotion();
+        });
+
+        function showInstallPromotion() {
+            // Create install banner if it doesn't exist
+            if (document.getElementById('pwa-install-banner')) return;
+
+            const banner = document.createElement('div');
                 banner.id = 'pwa-install-banner';
-                banner.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#3498db;color:white;padding:12px 20px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:9999;display:flex;gap:12px;align-items:center;max-width:90%;animation:slideUp 0.3s ease-out;';
+                banner.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#2563eb;color:white;padding:12px 20px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:9999;display:flex;gap:12px;align-items:center;max-width:90%;animation:slideUp 0.3s ease-out;';
                 banner.innerHTML = `
                     <span style="flex:1;font-size:14px;font-weight:500;">📱 Install Volatility 1040</span>
-                    <button onclick="triggerInstall()" style="background:white;color:#3498db;border:none;padding:8px 16px;border-radius:6px;font-weight:600;cursor:pointer;font-size:13px;">Install</button>
+                    <button onclick="triggerInstall()" style="background:white;color:#2563eb;border:none;padding:8px 16px;border-radius:6px;font-weight:600;cursor:pointer;font-size:13px;">Install</button>
                     <button onclick="dismissInstallPromotion()" style="background:transparent;color:white;border:1px solid white;padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;">Later</button>
                 `;
-                document.body.appendChild(banner);
-                
-                // Add animation
-                const style = document.createElement('style');
-                style.textContent = '@keyframes slideUp { from { bottom:-100px; opacity:0; } to { bottom:80px; opacity:1; } }';
-                document.head.appendChild(style);
-            }
+            document.body.appendChild(banner);
 
-            function showInstallFab() {
-                // Compact floating button for small screens
-                if (document.getElementById('pwa-install-fab')) return;
-                const dismissed = localStorage.getItem('pwa-install-dismissed');
-                // Skip if recently dismissed
-                if (dismissed && (Date.now() - parseInt(dismissed)) < 7 * 24 * 60 * 60 * 1000) return;
+            // Add animation
+            const style = document.createElement('style');
+            style.textContent = '@keyframes slideUp { from { bottom:-100px; opacity:0; } to { bottom:80px; opacity:1; } }';
+            document.head.appendChild(style);
+        }
 
-                const fab = document.createElement('button');
-                fab.id = 'pwa-install-fab';
-                fab.setAttribute('aria-label', 'Install app');
-                fab.style.cssText = 'position:fixed;right:16px;bottom:86px;width:52px;height:52px;border-radius:50%;background:#3498db;color:#fff;border:none;box-shadow:0 6px 16px rgba(0,0,0,0.25);z-index:10000;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;';
-                fab.textContent = '⬇';
-                fab.addEventListener('click', () => triggerInstall());
-                document.body.appendChild(fab);
-            }
-
-            window.dismissInstallPromotion = function() {
-                const banner = document.getElementById('pwa-install-banner');
-                if (banner) {
-                    banner.style.animation = 'slideDown 0.3s ease-out';
-                    setTimeout(() => banner.remove(), 300);
-                }
-                const fab = document.getElementById('pwa-install-fab');
-                if (fab) fab.remove();
-                localStorage.setItem('pwa-install-dismissed', Date.now());
-            };
-
-            async function triggerInstall() {
-                // iOS/Safari fallback: show instructions instead of prompt
-                const iOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-                const safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-                if (iOS || safari) {
-                    alert('To install on iPhone/iPad: Tap the Share icon, then choose "Add to Home Screen".');
-                    return;
-                }
-
-                if (!deferredPrompt) {
-                    // Helpful fallback for Android when the prompt event wasn't captured yet
-                    alert('If you don\'t see the install prompt, open the browser menu and choose "Install app" or "Add to Home screen".');
-                    return;
-                }
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                console.log('[PWA] Install prompt result:', outcome);
-                if (outcome === 'accepted') {
-                    dismissInstallPromotion();
-                }
-                deferredPrompt = null;
-            }
-
-            // Check if already installed
-            window.addEventListener('appinstalled', () => {
-                console.log('[PWA] App installed successfully');
-                dismissInstallPromotion();
-            });
-
-            // Don't show banner if dismissed recently (within 7 days)
+        function showInstallFab() {
+            // Compact floating button for small screens
+            if (document.getElementById('pwa-install-fab')) return;
             const dismissed = localStorage.getItem('pwa-install-dismissed');
-            if (dismissed && (Date.now() - parseInt(dismissed)) < 7 * 24 * 60 * 60 * 1000) {
-                deferredPrompt = null;
+            // Skip if recently dismissed
+            if (dismissed && (Date.now() - parseInt(dismissed)) < 7 * 24 * 60 * 60 * 1000) return;
+
+            const fab = document.createElement('button');
+            fab.id = 'pwa-install-fab';
+            fab.setAttribute('aria-label', 'Install app');
+            fab.style.cssText = 'position:fixed;right:16px;bottom:86px;width:52px;height:52px;border-radius:50%;background:#2563eb;color:#fff;border:none;box-shadow:0 6px 16px rgba(0,0,0,0.25);z-index:10000;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;';
+            fab.textContent = '⬇';
+            fab.addEventListener('click', () => triggerInstall());
+            document.body.appendChild(fab);
+        }
+
+        window.dismissInstallPromotion = function() {
+            const banner = document.getElementById('pwa-install-banner');
+            if (banner) {
+                banner.style.animation = 'slideDown 0.3s ease-out';
+                setTimeout(() => banner.remove(), 300);
+            }
+            const fab = document.getElementById('pwa-install-fab');
+            if (fab) fab.remove();
+            localStorage.setItem('pwa-install-dismissed', Date.now());
+        };
+
+        async function triggerInstall() {
+            // iOS/Safari fallback: show instructions instead of prompt
+            const iOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+            const safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+            if (iOS || safari) {
+                alert('To install on iPhone/iPad: Tap the Share icon, then choose "Add to Home Screen".');
+                return;
             }
 
-            // Fallback: show banner with instructions on iOS even if beforeinstallprompt doesn't fire
-            setTimeout(() => {
-                const iOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-                const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-                if (!deferredPrompt && iOS && !isStandalone) {
-                    // On iOS there is no beforeinstallprompt; show both FAB and banner for visibility
-                    showInstallFab();
-                    showInstallPromotion();
-                }
-            }, 1500);
+            if (!deferredPrompt) {
+                // Helpful fallback for Android when the prompt event wasn't captured yet
+                alert('If you don\'t see the install prompt, open the browser menu and choose "Install app" or "Add to Home screen".');
+                return;
+            }
+            deferredPrompt.prompt();
+            const {
+                outcome
+            } = await deferredPrompt.userChoice;
+            console.log('[PWA] Install prompt result:', outcome);
+            if (outcome === 'accepted') {
+                dismissInstallPromotion();
+            }
+            deferredPrompt = null;
+        }
 
-            // Also show a small FAB on Android if the event fires later or was missed
-            window.addEventListener('beforeinstallprompt', () => {
+        // Check if already installed
+        window.addEventListener('appinstalled', () => {
+            console.log('[PWA] App installed successfully');
+            dismissInstallPromotion();
+        });
+
+        // Don't show banner if dismissed recently (within 7 days)
+        const dismissed = localStorage.getItem('pwa-install-dismissed');
+        if (dismissed && (Date.now() - parseInt(dismissed)) < 7 * 24 * 60 * 60 * 1000) {
+            deferredPrompt = null;
+        }
+
+        // Fallback: show banner with instructions on iOS even if beforeinstallprompt doesn't fire
+        setTimeout(() => {
+            const iOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+            if (!deferredPrompt && iOS && !isStandalone) {
+                // On iOS there is no beforeinstallprompt; show both FAB and banner for visibility
                 showInstallFab();
-            });
-        </script>
+                showInstallPromotion();
+            }
+        }, 1500);
+
+        // Also show a small FAB on Android if the event fires later or was missed
+        window.addEventListener('beforeinstallprompt', () => {
+            showInstallFab();
+        });
+    </script>
     <script>
         // Transfer settings from cookies to sessionStorage for JavaScript access
         function getCookie(name) {
@@ -450,15 +463,15 @@ require 'helpers/currency_helpers.php';
 
 
         // Pairs modal handlers
-    const pairsBtn = document.getElementById('openPairsModal');
-    const pairsBtnMobile = document.getElementById('openPairsModalMobile');
+        const pairsBtn = document.getElementById('openPairsModal');
+        const pairsBtnMobile = document.getElementById('openPairsModalMobile');
         const pairsModal = document.getElementById('pairsModal');
-    const closePairsModal = document.getElementById('closePairsModal');
+        const closePairsModal = document.getElementById('closePairsModal');
         const cancelPairs = document.getElementById('cancelPairs');
         const savePairs = document.getElementById('savePairs');
-    const pairsSearch = document.getElementById('pairsSearch');
-    const selectAllPairs = document.getElementById('selectAllPairs');
-    const clearPairs = document.getElementById('clearPairs');
+        const pairsSearch = document.getElementById('pairsSearch');
+        const selectAllPairs = document.getElementById('selectAllPairs');
+        const clearPairs = document.getElementById('clearPairs');
 
         function showPairsModal() {
             // Precheck from cookie
@@ -469,20 +482,29 @@ require 'helpers/currency_helpers.php';
             });
             pairsModal.style.display = 'block';
         }
-        function hidePairsModal() { pairsModal.style.display = 'none'; }
-    if (pairsBtn) pairsBtn.addEventListener('click', showPairsModal);
-    if (pairsBtnMobile) pairsBtnMobile.addEventListener('click', showPairsModal);
+
+        function hidePairsModal() {
+            pairsModal.style.display = 'none';
+        }
+        if (pairsBtn) pairsBtn.addEventListener('click', showPairsModal);
+        if (pairsBtnMobile) pairsBtnMobile.addEventListener('click', showPairsModal);
         if (closePairsModal) closePairsModal.addEventListener('click', hidePairsModal);
         if (cancelPairs) cancelPairs.addEventListener('click', hidePairsModal);
-        if (pairsModal) pairsModal.addEventListener('click', (e) => { if (e.target === pairsModal) hidePairsModal(); });
+        if (pairsModal) pairsModal.addEventListener('click', (e) => {
+            if (e.target === pairsModal) hidePairsModal();
+        });
 
         if (savePairs) savePairs.addEventListener('click', async () => {
             const selected = Array.from(document.querySelectorAll('#pairsList .pair-checkbox:checked')).map(cb => cb.value);
             try {
                 const res = await fetch('update_pairs.php', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ pairs: selected })
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        pairs: selected
+                    })
                 });
                 if (!res.ok) throw new Error('Failed to update pairs');
                 const out = await res.json();
@@ -521,6 +543,7 @@ require 'helpers/currency_helpers.php';
         }
     </script>
     <!-- app.js is injected dynamically above after the chart library loads -->
-   
+
 </body>
+
 </html>

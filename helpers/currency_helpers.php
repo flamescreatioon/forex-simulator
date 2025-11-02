@@ -98,19 +98,21 @@ $account = [
 ];
 
 $currency_pairs = [
-    ['symbol' => 'EURUSD', 'bid' => 1.08501, 'ask' => 1.08503, 'change' => 0.15, 'direction' => 'up'],
-    ['symbol' => 'AUDCAD', 'bid' => 0.91162, 'ask' => 0.91175, 'change' => 0.41, 'direction' => 'up'],
-    ['symbol' => 'AUDCHF', 'bid' => 0.51828, 'ask' => 0.51841, 'change' => 0.41, 'direction' => 'down'],
-    ['symbol' => 'AUDDKK', 'bid' => 4.45852, 'ask' => 4.46016, 'change' => 0, 'direction' => 'neutral'],
-    ['symbol' => 'AUDHKD', 'bid' => 5.25944, 'ask' => 5.25953, 'change' => 0, 'direction' => 'neutral'],
-    ['symbol' => 'AUDHUF', 'bid' => 228.86992, 'ask' => 229.08708, 'change' => 0, 'direction' => 'neutral'],
-    ['symbol' => 'AUDJPY', 'bid' => 99.435, 'ask' => 99.448, 'change' => 0.89, 'direction' => 'up'],
-    ['symbol' => 'AUDNOK', 'bid' => 6.89340, 'ask' => 6.89630, 'change' => 0, 'direction' => 'neutral'],
-    ['symbol' => 'AUDNZD', 'bid' => 1.13246, 'ask' => 1.13273, 'change' => 0.21, 'direction' => 'up'],
-    ['symbol' => 'AUDPLN', 'bid' => 2.63122, 'ask' => 2.63225, 'change' => 0, 'direction' => 'neutral'],
-    ['symbol' => 'AUDSEK', 'bid' => 6.11812, 'ask' => 6.12610, 'change' => 0.46, 'direction' => 'up'],
+    ['symbol' => 'Volatility 10 (1s) Index', 'bid' => 1245.82, 'ask' => 1245.95, 'change' => 0.23, 'direction' => 'up'],
+    ['symbol' => 'Volatility 25 (1s) Index', 'bid' => 2089.45, 'ask' => 2089.62, 'change' => 0.45, 'direction' => 'up'],
+    ['symbol' => 'Volatility 50 (1s) Index', 'bid' => 2456.78, 'ask' => 2456.93, 'change' => -0.12, 'direction' => 'down'],
+    ['symbol' => 'Volatility 75 (1s) Index', 'bid' => 3569.45, 'ask' => 3569.59, 'change' => 1.34, 'direction' => 'up'],
+    ['symbol' => 'Volatility 100 (1s) Index', 'bid' => 5012.30, 'ask' => 5012.45, 'change' => 0.87, 'direction' => 'up'],
+    ['symbol' => 'Volatility 10 Index', 'bid' => 1198.56, 'ask' => 1198.67, 'change' => 0.15, 'direction' => 'up'],
+    ['symbol' => 'Volatility 25 Index', 'bid' => 2034.21, 'ask' => 2034.35, 'change' => 0.28, 'direction' => 'up'],
+    ['symbol' => 'Volatility 50 Index', 'bid' => 2387.92, 'ask' => 2388.05, 'change' => -0.08, 'direction' => 'down'],
+    ['symbol' => 'Volatility 75 Index', 'bid' => 3456.78, 'ask' => 3456.91, 'change' => 0.92, 'direction' => 'up'],
+    ['symbol' => 'Volatility 100 Index', 'bid' => 4876.34, 'ask' => 4876.48, 'change' => 0.65, 'direction' => 'up'],
 ];
 
+// Default demo positions now use Synthetic Volatility Indices
 $positions = [
-    ['symbol' => 'AUDCAD', 'type' => 'buy', 'volume' => 0.02, 'open_price' => 0.91182, 'current_price' => 0.91174, 'profit' => -0.11]
+    ['symbol' => 'Volatility 75 (1s) Index', 'type' => 'buy', 'volume' => 20, 'open_price' => 3077.89, 'current_price' => 3569.59, 'profit' => 9834.00],
+    ['symbol' => 'Volatility 75 (1s) Index', 'type' => 'buy', 'volume' => 20, 'open_price' => 3077.61, 'current_price' => 3569.59, 'profit' => 9839.60],
+    ['symbol' => 'Volatility 100 (1s) Index', 'type' => 'buy', 'volume' => 15, 'open_price' => 4521.30, 'current_price' => 5012.45, 'profit' => 7367.25]
 ];

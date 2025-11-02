@@ -3,14 +3,30 @@
 require_once 'includes/session.php';
 require_once 'includes/db.php';
 header('Content-Type: application/json');
+// Add caching headers to prevent excessive requests
+header('Cache-Control: no-cache, must-revalidate, max-age=0');
+header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
+header('Pragma: no-cache');
 // Don't leak PHP warnings/notices into JSON responses
 @ini_set('display_errors', 0);
 @error_reporting(E_ERROR | E_PARSE);
 
-$session_id = session_id();
+$session_id = $_SESSION['client_id'] ?? session_id();
 
 if(!isset($_SESSION['trades'])){
     $_SESSION['trades'] = [];
+}
+
+// If there are no in-memory trades, try restoring open positions from DB using persistent id
+if (isset($db) && $db !== null && is_array($_SESSION['trades']) && count($_SESSION['trades']) === 0) {
+    try {
+        $restored = $db->getPositions();
+        if ($restored && is_array($restored) && count($restored) > 0) {
+            $_SESSION['trades'] = $restored;
+        }
+    } catch (Throwable $e) {
+        // ignore restore errors
+    }
 }
 
 // --- Helper functions ---
@@ -46,7 +62,18 @@ function pip_value_usd($pair) {
 // --- Settings ---
 $pairs = (isset($_SESSION['pairs']) && is_array($_SESSION['pairs']) && !empty($_SESSION['pairs']))
     ? $_SESSION['pairs']
-    : ['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD', 'USD/CAD', 'USD/CHF', 'NZD/USD', 'GBP/JPY'];
+    : [
+        'Volatility 10 (1s) Index',
+        'Volatility 25 (1s) Index',
+        'Volatility 50 (1s) Index',
+        'Volatility 75 (1s) Index',
+        'Volatility 100 (1s) Index',
+        'Volatility 10 Index',
+        'Volatility 25 Index',
+        'Volatility 50 Index',
+        'Volatility 75 Index',
+        'Volatility 100 Index'
+    ];
 $lot_size = floatval($_SESSION['default_lot_size'] ?? 0.01);
 $risk_percentage = floatval($_SESSION['risk_percentage'] ?? 2.0);
 $balance = floatval($_SESSION['balance'] ?? 10000);
@@ -144,6 +171,17 @@ try {
         $last = $_SESSION['trades'][0];
         $stmt = $pdo->prepare("INSERT INTO trades (session_id, pair, profit) VALUES (?, ?, ?)");
         $stmt->execute([$session_id, $last['pair'], $last['profit']]);
+        
+        // Also save all positions to database for persistence
+        if (isset($db) && $db !== null) {
+            foreach ($_SESSION['trades'] as $trade) {
+                try {
+                    $db->savePosition($trade);
+                } catch (Exception $e) {
+                    // Continue on individual save errors
+                }
+            }
+        }
     }
 } catch (Throwable $e) {
     // ignore for demo

@@ -12,7 +12,21 @@ function price_from_pips($pair, $price, $pips) {
     return round($price + ($pips * 0.0001), 4);
 }
 
-$pairs = ['EUR/USD','GBP/USD','USD/JPY','AUD/USD','USD/CAD','USD/CHF','NZD/USD','GBP/JPY'];
+$pairs = [
+  // Synthetic Volatility Indices (default choices)
+  'Volatility 10 (1s) Index',
+  'Volatility 25 (1s) Index',
+  'Volatility 50 (1s) Index',
+  'Volatility 75 (1s) Index',
+  'Volatility 100 (1s) Index',
+  'Volatility 10 Index',
+  'Volatility 25 Index',
+  'Volatility 50 Index',
+  'Volatility 75 Index',
+  'Volatility 100 Index',
+  // Common FX pairs (kept as additional options)
+  'EUR/USD','GBP/USD','USD/JPY','AUD/USD','USD/CAD','USD/CHF','NZD/USD','GBP/JPY'
+];
 $sl_pips_default = intval($_SESSION['stop_loss_pips'] ?? 20);
 $tp_pips_default = intval($_SESSION['take_profit_pips'] ?? 40);
 $lot_default = floatval($_SESSION['default_lot_size'] ?? 0.01);
@@ -188,19 +202,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <span>Quotes</span>
     </a>
     <a class="mobile-nav-item" href="index.php#chart">
-      <span class="nav-icon">⌭</span>
+      <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-align-horizontal-distribute-center-icon lucide-align-horizontal-distribute-center">
+          <rect width="6" height="14" x="4" y="5" rx="2" fill="currentColor" stroke="none" />
+          <rect width="6" height="10" x="14" y="7" rx="2" />
+          <path d="M17 22v-5" />
+          <path d="M17 7V2" />
+          <path d="M7 22v-3" />
+          <path d="M7 5V2" />
+        </svg></span>
       <span>Chart</span>
     </a>
     <a class="mobile-nav-item active" href="trade.php">
-      <span class="nav-icon">≡</span>
+      <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-line-icon lucide-chart-line"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></svg></span>
       <span>Trade</span>
     </a>
     <a class="mobile-nav-item" href="trades_view.php">
-      <span class="nav-icon">⏱</span>
+      <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-history-icon lucide-history"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg></span>
       <span>History</span>
     </a>
     <a class="mobile-nav-item" href="set_params.php">
-      <span class="nav-icon">⚙</span>
+      <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-icon lucide-settings"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg></span>
       <span>Settings</span>
     </a>
   </div>

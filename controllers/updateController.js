@@ -9,6 +9,12 @@ function updateDashboard(){
             const balanceEl = document.getElementById('balance');
             if (balanceEl && data.balance != null) balanceEl.textContent = data.balance;
 
+            // Also update top-of-page balance/equity displays if present
+            const balanceTopEl = document.getElementById('balanceTop');
+            if (balanceTopEl && data.balance != null) balanceTopEl.textContent = data.balance + ' USD';
+            const equityTopEl = document.getElementById('equityTop');
+            if (equityTopEl && data.equity != null) equityTopEl.textContent = data.equity + ' USD';
+
             const equityEl = document.getElementById('equity');
             if (equityEl && data.equity != null) equityEl.textContent = data.equity;
 

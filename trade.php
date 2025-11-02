@@ -36,7 +36,7 @@ require_once 'includes/session.php';
     .equity-amount {
       font-size: 28px;
       font-weight: 700;
-      color: #3498db;
+      color: #2563eb;
     }
     .menu-icon {
       width: 40px;
@@ -117,14 +117,14 @@ require_once 'includes/session.php';
     }
     .position-type {
       font-size: 14px;
-      color: #3498db;
+      color: #2563eb;
       font-weight: 500;
       margin-left: 6px;
     }
     .position-profit {
       font-size: 20px;
       font-weight: 700;
-      color: #3498db;
+      color: #2563eb;
     }
     .position-details {
       font-size: 13px;
@@ -160,7 +160,7 @@ require_once 'includes/session.php';
     <!-- Equity Header -->
     <div class="equity-header">
       <div class="menu-icon">☰</div>
-      <div class="equity-amount"><?= number_format($_SESSION['equity'], 2) ?> USD</div>
+      <div class="equity-amount" id="balanceTop"><?= number_format($_SESSION['equity'], 2) ?> USD</div>
       <a class="menu-icon" href="manage_positions.php" style="text-decoration:none;color:#666">+</a>
     </div>
     
@@ -168,23 +168,23 @@ require_once 'includes/session.php';
     <div class="account-info-list">
       <div class="info-row">
         <span class="info-label">Balance:</span>
-        <span class="info-value"><?= number_format($_SESSION['balance'], 2) ?></span>
+        <span class="info-value" id="balance"><?= number_format($_SESSION['balance'], 2) ?></span>
       </div>
       <div class="info-row">
         <span class="info-label">Equity:</span>
-        <span class="info-value"><?= number_format($_SESSION['equity'], 2) ?></span>
+        <span class="info-value" id="equity"><?= number_format($_SESSION['equity'], 2) ?></span>
       </div>
       <div class="info-row">
         <span class="info-label">Margin:</span>
-        <span class="info-value"><?= number_format($_SESSION['margin'], 2) ?></span>
+        <span class="info-value" id="margin"><?= number_format($_SESSION['margin'], 2) ?></span>
       </div>
       <div class="info-row">
         <span class="info-label">Free Margin:</span>
-        <span class="info-value"><?= number_format($_SESSION['freemargin'], 2) ?></span>
+        <span class="info-value" id="freemargin"><?= number_format($_SESSION['freemargin'], 2) ?></span>
       </div>
       <div class="info-row">
         <span class="info-label">Margin Level (%):</span>
-        <span class="info-value"><?= $_SESSION['marginlevel'] ?></span>
+        <span class="info-value" id="marginlevel"><?= number_format($_SESSION['marginlevel'], 2) ?>%</span>
       </div>
     </div>
     
@@ -206,19 +206,26 @@ require_once 'includes/session.php';
       <span>Quotes</span>
     </a>
     <a class="mobile-nav-item" href="index.php#chart">
-      <span class="nav-icon">⌭</span>
+      <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-align-horizontal-distribute-center-icon lucide-align-horizontal-distribute-center">
+          <rect width="6" height="14" x="4" y="5" rx="2" fill="currentColor" stroke="none" />
+          <rect width="6" height="10" x="14" y="7" rx="2" />
+          <path d="M17 22v-5" />
+          <path d="M17 7V2" />
+          <path d="M7 22v-3" />
+          <path d="M7 5V2" />
+        </svg></span>
       <span>Chart</span>
     </a>
     <a class="mobile-nav-item active" href="trade.php">
-      <span class="nav-icon">≡</span>
+      <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-line-icon lucide-chart-line"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></svg></span>
       <span>Trade</span>
     </a>
     <a class="mobile-nav-item" href="trades_view.php">
-      <span class="nav-icon">⏱</span>
+      <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-history-icon lucide-history"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg></span>
       <span>History</span>
     </a>
     <a class="mobile-nav-item" href="set_params.php">
-      <span class="nav-icon">⚙</span>
+      <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-icon lucide-settings"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg></span>
       <span>Settings</span>
     </a>
   </div>
@@ -238,9 +245,9 @@ require_once 'includes/session.php';
         let html = '';
         data.forEach(trade => {
           const profit = parseFloat(trade.profit) || 0;
-          const profitColor = profit >= 0 ? '#3498db' : '#e74c3c';
+          const profitColor = profit >= 0 ? '#2563eb' : '#e74c3c';
           const type = (trade.type || 'buy').toLowerCase();
-          const typeColor = type === 'buy' ? '#3498db' : '#e74c3c';
+          const typeColor = type === 'buy' ? '#2563eb' : '#e74c3c';
           const pips = typeof trade.pips !== 'undefined' ? trade.pips : '';
           const amount = trade.amount || '0';
           
@@ -284,5 +291,7 @@ require_once 'includes/session.php';
     });
   </script>
   <script src="assets/js/mobile-nav.js"></script>
+  <!-- Reuse dashboard updater to keep account info live here as well -->
+  <script src="controllers/updateController.js"></script>
 </body>
 </html>

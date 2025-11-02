@@ -115,8 +115,20 @@ if (!isset($_SESSION['profit_scale'])) {
 }
 
 // Instruments/pairs defaults (used by trades and quotes)
+// Default to Synthetic Volatility Indices for trading if user hasn't chosen pairs yet.
 if (!isset($_SESSION['pairs']) || !is_array($_SESSION['pairs']) || empty($_SESSION['pairs'])) {
-    $_SESSION['pairs'] = ['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD', 'USD/CAD', 'USD/CHF', 'NZD/USD', 'GBP/JPY'];
+    $_SESSION['pairs'] = [
+        'Volatility 10 (1s) Index',
+        'Volatility 25 (1s) Index',
+        'Volatility 50 (1s) Index',
+        'Volatility 75 (1s) Index',
+        'Volatility 100 (1s) Index',
+        'Volatility 10 Index',
+        'Volatility 25 Index',
+        'Volatility 50 Index',
+        'Volatility 75 Index',
+        'Volatility 100 Index'
+    ];
 }
 
 // Chart timeframe defaults

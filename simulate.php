@@ -9,11 +9,11 @@ header('Content-Type: application/json');
 $session_id = session_id();
 
 // Use session values (defaults already loaded from includes/defaults.php)
-$balance = $_SESSION["balance"];
-$profit = $_SESSION["profit"];
+$balance = floatval($_SESSION["balance"]);
+$profit = floatval($_SESSION["profit"]);
 $goal = $_SESSION["goal"];
-$margin = $_SESSION["margin"];
-$leverage = $_SESSION["leverage"];
+$margin = floatval($_SESSION["margin"]);
+$leverage = max(1, floatval($_SESSION["leverage"]));
 $price_volatility = $_SESSION["price_volatility"] ?? 1.0; // volatility multiplier
 $sim_speed = $_SESSION["sim_speed"] ?? 'normal'; // simulation speed
 
@@ -34,15 +34,42 @@ if ($auto_trade && $balance < $goal) {
     $_SESSION["balance"] = $balance;
 }
 
-// Calculate derived account values
-$equity = $balance + $profit;                     // equity (balance + profit)
-$free_margin = $equity - $margin;                 // free margin available
-$margin_level = $margin > 0 ? ($equity / $margin) * 100 : 0; // margin level as percentage
+// Calculate open P/L from live trades (floating P/L)
+$open_pnl = 0.0;
+if (!empty($_SESSION['trades']) && is_array($_SESSION['trades'])) {
+    foreach ($_SESSION['trades'] as $t) {
+        $open_pnl += floatval($t['profit'] ?? 0);
+    }
+}
+
+// Recompute margin usage from open positions based on leverage (approximation)
+$computed_margin = 0.0;
+if (!empty($_SESSION['trades']) && is_array($_SESSION['trades'])) {
+    foreach ($_SESSION['trades'] as $t) {
+        $lot = floatval($t['lot_size'] ?? 0.0);
+        $notional = $lot * 100000.0; // standard lot notional in USD terms (simplified)
+        $computed_margin += ($notional / $leverage);
+    }
+}
+
+// If we computed margin from trades, prefer it over session margin
+if ($computed_margin > 0) {
+    $margin = $computed_margin;
+}
+
+// Equity uses floating P/L from open positions
+$equity = $balance + $open_pnl;
+$free_margin = $equity - $margin;
+$margin_level = $margin > 0 ? ($equity / $margin) * 100 : 0;
 
 // Persist derived values to session for later use
 $_SESSION["freemargin"] = $free_margin;
 $_SESSION["marginlevel"] = $margin_level;
 $_SESSION["equity"] = $equity;
+$_SESSION["margin"] = $margin;
+
+// Reflect floating P/L in the session profit value for display purposes
+$_SESSION["profit"] = $open_pnl;
 
 // Determine if goal has been reached
 $goal_reached = $balance >= $goal;
@@ -57,8 +84,19 @@ try {
             $insert = $pdo->prepare("INSERT INTO sessions (session_id, balance, equity, margin, free_margin, margin_level, profit, goal) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
             $insert->execute([$session_id, $balance, $equity, $margin, $free_margin, $margin_level, $profit, $goal]);
         } else {
-            $update = $pdo->prepare("UPDATE sessions SET balance=?, equity=?, margin=?, free_margin=?, margin_level=?, profit=?, goal=? WHERE session_id=?");
+            $update = $pdo->prepare("UPDATE sessions SET balance=?, equity=?, margin=?, free_margin=?, margin_level=?, profit=?, goal=?, updated_at=NOW() WHERE session_id=?");
             $update->execute([$balance, $equity, $margin, $free_margin, $margin_level, $profit, $goal, $session_id]);
+        }
+        
+        // Also save positions to DB periodically (every update)
+        if (isset($db) && !empty($_SESSION['trades'])) {
+            foreach ($_SESSION['trades'] as $trade) {
+                try {
+                    $db->savePosition($trade);
+                } catch (Exception $e) {
+                    // Continue on individual position save errors
+                }
+            }
         }
     }
 } catch (Throwable $e) {
@@ -66,13 +104,16 @@ try {
 }
 
 // Return a JSON payload with formatted numbers (after DB ops to avoid corrupting JSON with PHP notices)
+// Show balance as equity so the balance visibly changes with trades (per request)
+$display_balance = $equity;
+
 echo json_encode([
-    'balance' => number_format($balance, 2),
+    'balance' => number_format($display_balance, 2),
     'equity' => number_format($equity, 2),
     'margin' => number_format($margin, 2),
     'freemargin' => number_format($free_margin, 2),
     'marginlevel' => number_format($margin_level, 2) . '%',
-    'profit' => number_format($profit, 2),
+    'profit' => number_format($open_pnl, 2),
     'goal' => number_format($goal, 2),
     'goal_reached' => $goal_reached
 ]);

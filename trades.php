@@ -78,7 +78,9 @@ $lot_size = floatval($_SESSION['default_lot_size'] ?? 0.01);
 $risk_percentage = floatval($_SESSION['risk_percentage'] ?? 2.0);
 $balance = floatval($_SESSION['balance'] ?? 10000);
 $risk_amount = max(1.0, ($balance * $risk_percentage) / 100);
+// Ensure we always have at least 1 for demo; if user configured 0, we'll still seed a minimal demo
 $positions_count = intval($_SESSION['positions_count'] ?? ($_SESSION['max_positions'] ?? 5));
+if ($positions_count <= 0) { $positions_count = 3; }
 $profit_bias = floatval($_SESSION['profit_bias'] ?? 0.75); // 0..1
 $profit_scale = floatval($_SESSION['profit_scale'] ?? 1.0);
 $auto_trade = intval($_SESSION['auto_trade'] ?? 0);
@@ -133,6 +135,34 @@ if ($auto_trade == 1 || count($_SESSION['trades']) === 0) {
         ]);
     }
     $_SESSION['trades'] = array_slice($_SESSION['trades'], 0, $positions_count);
+}
+
+// Final fallback: if still empty (e.g., misconfig), seed with 3 demo positions
+if (count($_SESSION['trades']) === 0) {
+    $seed_count = 3;
+    for ($i = 0; $i < $seed_count; $i++) {
+        $pair = $pairs[array_rand($pairs)];
+        $type = (mt_rand(0, 100) < 60) ? 'buy' : 'sell';
+        $entry = gen_entry_price($pair);
+        $current = price_from_pips($pair, $entry, mt_rand(-15, 15));
+        $pips = pips_between($pair, $entry, $current) * ($type === 'buy' ? 1 : -1);
+        $profit = $pips * pip_value_usd($pair) * ($lot_size ?: 0.01) * $profit_scale;
+        $_SESSION['trades'][] = [
+            'id' => uniqid('pos_', true),
+            'pair' => $pair,
+            'type' => $type,
+            'lot_size' => ($lot_size ?: 0.01),
+            'entry' => $entry,
+            'current' => $current,
+            'pips' => $pips,
+            'sl' => null,
+            'tp' => null,
+            'open_time' => date('Y-m-d H:i:s'),
+            'profit' => round($profit, 2),
+            'timestamp' => date('H:i:s'),
+            'amount' => number_format(($lot_size ?: 0.01) * 100000, 0, '.', ',')
+        ];
+    }
 }
 
 // Update each position with biased drift

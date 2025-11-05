@@ -30,24 +30,16 @@ require_once 'includes/session.php';
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 12px 0;
-      margin-bottom: 16px;
+      padding: 10px 0;
+      margin-bottom: 12px;
     }
     .equity-amount {
       font-size: 28px;
       font-weight: 700;
       color: #2563eb;
     }
-    .menu-icon {
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      cursor: pointer;
-      color: #666;
-    }
+    .menu-icon { width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: #666; }
+    .menu-icon svg { width: 28px; height: 28px; display: block; }
     
     /* Account Info Section - Compact List Style */
     .account-info-list {
@@ -82,7 +74,7 @@ require_once 'includes/session.php';
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin: 20px 0 12px;
+      margin: 16px 0 8px;
     }
     .positions-title {
       font-size: 16px;
@@ -100,43 +92,26 @@ require_once 'includes/session.php';
       background: #fff;
       border: none;
       border-radius: 8px;
-      padding: 14px;
-      margin-bottom: 10px;
+      padding: 10px 12px; /* compact */
+      margin-bottom: 6px; /* compact spacing between positions */
       cursor: pointer;
     }
     .position-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 6px;
+      margin-bottom: 4px; /* compact */
     }
-    .position-pair {
-      font-size: 16px;
-      font-weight: 700;
-      color: #333;
-    }
-    .position-type {
-      font-size: 14px;
-      color: #2563eb;
-      font-weight: 500;
-      margin-left: 6px;
-    }
-    .position-profit {
-      font-size: 20px;
-      font-weight: 700;
-      color: #2563eb;
-    }
-    .position-details {
-      font-size: 13px;
-      color: #999;
-      margin-top: 4px;
-    }
+    .position-pair { font-size: 15px; font-weight: 700; color: #333; }
+    .position-type { font-size: 13px; color: #2563eb; font-weight: 500; margin-left: 6px; }
+    .position-profit { font-size: 18px; font-weight: 700; color: #2563eb; }
+    .position-details { font-size: 12px; color: #999; margin-top: 2px; }
     .details-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      grid-row-gap: 4px;
-      grid-column-gap: 12px;
-      margin-top: 6px;
+      grid-row-gap: 2px;
+      grid-column-gap: 10px;
+      margin-top: 4px;
     }
     .details-label {
       color: #777;
@@ -159,8 +134,21 @@ require_once 'includes/session.php';
     
     <!-- Equity Header -->
     <div class="equity-header">
-      <div class="menu-icon">☰</div>
-      <div class="equity-amount" id="balanceTop"><?= number_format($_SESSION['equity'], 2) ?> USD</div>
+      <div class="menu-icon" aria-label="Wallet">
+        <!-- Wallet icon (Lucide) to match MT5-style account icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-hidden="true">
+          <path d="M20 7H5a2 2 0 0 1 0-4h13" />
+          <path d="M3 7h17a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H3z" />
+          <path d="M17 12h.01" />
+        </svg>
+      </div>
+      <?php 
+        $open_pnl_display = isset($_SESSION['profit']) ? floatval($_SESSION['profit']) : 0.0; 
+        if ($open_pnl_display === 0.0 && !empty($_SESSION['trades']) && is_array($_SESSION['trades'])) {
+            foreach ($_SESSION['trades'] as $t) { $open_pnl_display += floatval($t['profit'] ?? 0); }
+        }
+      ?>
+      <div class="equity-amount" id="profitTop"><?= number_format($open_pnl_display, 2) ?> USD</div>
       <a class="menu-icon" href="manage_positions.php" style="text-decoration:none;color:#666">+</a>
     </div>
     
@@ -168,7 +156,7 @@ require_once 'includes/session.php';
     <div class="account-info-list">
       <div class="info-row">
         <span class="info-label">Balance:</span>
-        <span class="info-value" id="balance"><?= number_format($_SESSION['balance'], 2) ?></span>
+        <span class="info-value" id="profit"><?= number_format($open_pnl_display, 2) ?></span>
       </div>
       <div class="info-row">
         <span class="info-label">Equity:</span>
@@ -231,11 +219,31 @@ require_once 'includes/session.php';
   </div>
 
   <script>
+    // Keep the trade-only balance (open P/L) updated in the header
+    function updateTradeHeader() {
+      fetch('simulate.php', { cache: 'no-store' })
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(data => {
+          const top = document.getElementById('profitTop');
+          if (top && data && typeof data.profit !== 'undefined') {
+            top.textContent = data.profit + ' USD';
+          }
+        })
+        .catch(() => {});
+    }
+    // Run on load and at the same cadence as other updates
+    updateTradeHeader();
+    setInterval(updateTradeHeader, 3000);
+
     // Fetch and display positions
     async function fetchPositions() {
       try {
         const res = await fetch('trades.php');
-        const data = await res.json();
+        let data = await res.json();
+        // Be tolerant if API returns an object wrapper
+        if (!Array.isArray(data) && data && Array.isArray(data.trades)) {
+          data = data.trades;
+        }
 
         if (!Array.isArray(data) || data.length === 0) {
           document.getElementById('positions').innerHTML = '<div class="empty-state">No positions yet</div>';
